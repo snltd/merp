@@ -1,0 +1,84 @@
+name: Static
+
+on:
+  push:
+    branches:
+      - 'master'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Build and release Pay Team Manual as a static site
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@7d546f4868fb108ed378764d873683f920672ae2
+        with:
+          ruby-version: '.ruby-version'
+          bundler-cache: true
+      - name: Setup Pages
+        uses: actions/configure-pages@f156874f8191504dae5b037505266ed5dda6c382
+      - name: Install and Build
+        run: |
+          bundle exec middleman build
+      - name: Set artifact name
+        id: artifact-name
+        run: echo "name=pay-team-manual-$GITHUB_SHA" >> $GITHUB_OUTPUT
+      - name: Prepare archive for upload
+        id: archive-assets
+        shell: sh
+        run: |
+          chmod -c -R +rX "build"
+          tar \
+            --dereference --hard-dereference \
+            --directory "build" \
+            -cvf "${{ steps.artifact-name.outputs.name }}.tar" \
+            .
+      - name: Create Release
+        id: create-release
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            var fs = require('fs')
+            try {
+              const releaseResponse = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: "${GITHUB_SHA}",
+                name: "${GITHUB_SHA}"
+              })
+              const fileName = "${{ steps.artifact-name.outputs.name }}.tar"
+              const releaseUploadResponse = await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: releaseResponse.data.id,
+                name: fileName,
+                data: fs.readFileSync(fileName)
+              })
+            } catch(err) {
+              console.error(`Failed to create release: ${err.message}`)
+              throw err
+            }
+      - name: Upload Pages artifact
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: 'github-pages'
+          path: ${{ steps.artifact-name.outputs.name }}.tar
+          retention-days: 7
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@af48cf94a42f2c634308b1c9dc0151830b6f190a
