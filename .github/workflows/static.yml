@@ -48,8 +48,8 @@ jobs:
               const releaseResponse = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                tag_name: "${GITHUB_SHA}",
-                name: "${GITHUB_SHA}"
+                tag_name: process.env.GITHUB_SHA,
+                name: process.env.GITHUB_SHA
               })
               const fileName = "${{ steps.artifact-name.outputs.name }}.tar"
               const releaseUploadResponse = await github.rest.repos.uploadReleaseAsset({
