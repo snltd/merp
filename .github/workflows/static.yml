@@ -24,16 +24,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@7d546f4868fb108ed378764d873683f920672ae2
-        with:
-          ruby-version: '.ruby-version'
-          bundler-cache: true
-      - name: Setup Pages
-        uses: actions/configure-pages@f156874f8191504dae5b037505266ed5dda6c382
-      - name: Install and Build
-        run: |
-          bundle exec middleman build
       - name: Set artifact name
         id: artifact-name
         run: echo "name=merp-$GITHUB_SHA" >> $GITHUB_OUTPUT
