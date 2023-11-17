@@ -1,4 +1,4 @@
-name: Static
+# name: Static
 
 on:
   push:
@@ -44,12 +44,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             var fs = require('fs')
+            const ver = new Date().getTime() / 1000;
             try {
               const releaseResponse = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                tag_name: process.env.GITHUB_SHA,
-                name: process.env.GITHUB_SHA
+                tag_name: ver,
+                name: ver
               })
               const fileName = "${{ steps.artifact-name.outputs.name }}.tar"
               const releaseUploadResponse = await github.rest.repos.uploadReleaseAsset({
