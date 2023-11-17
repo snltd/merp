@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   static:
-    name: Build and release Pay Team Manual as a static site
+    name: Build and release as a static site
     environment:
       name: github-pages
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
           bundle exec middleman build
       - name: Set artifact name
         id: artifact-name
-        run: echo "name=pay-team-manual-$GITHUB_SHA" >> $GITHUB_OUTPUT
+        run: echo "name=merp-$GITHUB_SHA" >> $GITHUB_OUTPUT
       - name: Prepare archive for upload
         id: archive-assets
         shell: sh
