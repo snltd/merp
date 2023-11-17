@@ -44,7 +44,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             var fs = require('fs')
-            const ver = new Date().getTime();
+            const ver = new Date().getTime().toString();
             try {
               const releaseResponse = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
