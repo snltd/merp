@@ -15,6 +15,9 @@ concurrency:
   group: 'pages'
   cancel-in-progress: true
 
+env:
+  TAG_NAME: date +%Y-%m-%d_%H-%M-%S
+
 jobs:
   static:
     name: Build and release as a static site
@@ -22,6 +25,8 @@ jobs:
       name: github-pages
     runs-on: ubuntu-latest
     steps:
+      - name: Set Release Tag
+        run: RELEASE_TAG=$(date "+%Y-%m-%d_%H-%M-%S") >>$GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Set artifact name
@@ -68,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         with:
           name: 'github-pages'
-          path: ${{ steps.artifact-name.outputs.name }}.tar
+          path: ${{ steps.artifact-name.outputs.name }}-${{ env.RELEASE_TAG }}.tar
           retention-days: 7
       - name: Deploy to GitHub Pages
         id: deployment
