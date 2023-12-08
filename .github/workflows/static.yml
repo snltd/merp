@@ -15,9 +15,6 @@ concurrency:
   group: 'pages'
   cancel-in-progress: true
 
-env:
-  TAG_NAME: date +%Y-%m-%d_%H-%M-%S
-
 jobs:
   static:
     name: Build and release as a static site
@@ -32,7 +29,7 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Set artifact name
         id: artifact-name
-        run: echo "name=merp-$GITHUB_SHA-${{ steps.release-tag.outputs.tag }}" >> $GITHUB_OUTPUT
+        run: echo "name=merp-$GITHUB_SHA-${{ steps.release-tag.outputs.tag }}-xxx" >> $GITHUB_OUTPUT
       - name: Prepare archive for upload
         id: archive-assets
         shell: sh
