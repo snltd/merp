@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Set artifact name
         id: artifact-name
-        run: echo "name=merp-$GITHUB_SHA-${{ env.release-tag }}-xxx" >> $GITHUB_OUTPUT
+        run: echo "name=merp-$GITHUB_SHA-${{ env.release_tag }}-xxx" >> $GITHUB_OUTPUT
       - name: Prepare archive for upload
         id: archive-assets
         shell: sh
