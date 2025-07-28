@@ -1,30 +1,20 @@
 (use sh)
 (use judge)
 
-(deftest "builder zone"
-  (test ($< zfs list -Ho "name,mountpoint" fast/zone/build/build)
-        "fast/zone/build/build\t/build\n")
-
-  (test ($< zfs list -Ho "name,mountpoint" fast/zone/build/config)
-        "fast/zone/build/config\t/build/configs\n")
-
-  (test ($< zfs list -Ho "name,mountpoint" fast/zone/build)
-        "fast/zone/build\tnone\n")
-
+(deftest "workstation"
   (def installed-pkgs (string/split "\n" ($< pkg list -Ho name)))
 
   (test
     (all |(has-value? installed-pkgs $)
-         ["developer/build/onbld"
-          "developer/illumos-tools"
-          "developer/omnios-build-tools"
-          "network/rsync"
-          "ooce/developer/aarch64-sysroot"
-          "ooce/extra-build-tools"
-          "ooce/omnios-build-tools"
-          "ooce/ooceapps"
+         ["ooce/application/imagemagick"
+          "ooce/audio/flac"
+          "ooce/editor/helix"
+          "ooce/multimedia/ffmpeg"
           "sysdef/audio/lame"
-          "sysdef/runtime/janet"]) true)
+          "sysdef/audio/mp3val"
+          "sysdef/audio/shntool"
+          "sysdef/util/little-tools"
+          "sysdef/util/zfs-tools"]) true)
 
   (test
     # Redact the version, because that will change
