@@ -33,7 +33,7 @@
                             :gecos "Rob Fisher"
                             :home-dir "/home/rob"
                             :shell "/bin/zsh"
-                            :password-hash "$5$cfF.Yhol$4PoT1I87RM.EPq9/51PZUWzERcEJOJyRmUXSl9nlk19"
+                            :password-hash "MYPASSWORDHASH"
                             :primary-group "sysadmin"))
 
       (section cron
@@ -50,6 +50,8 @@
 
       (section good-sense
                (file-line/ensure "/etc/profile"
+                                 :label "profile-set-o-vi"
                                  :line "set -o vi")
                (file-line/ensure "/etc/profile"
+                                 :label "profile-path"
                                  :line "PATH=${PATH}:/opt/ooce/bin")))

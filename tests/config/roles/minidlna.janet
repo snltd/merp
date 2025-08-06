@@ -8,10 +8,10 @@
 
       (file/ensure smf-method
                    :mode "0755"
-                   :from "minidlna-method.sh")
+                   :from "minidlna/minidlna-method.sh")
 
       (file/ensure "/etc/opt/ooce/minidlna/minidlna.conf"
-                   :from "minidlna.conf")
+                   :from "minidlna/minidlna.conf")
 
       (svc/ensure smf-service
                   :state "online")

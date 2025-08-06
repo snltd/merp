@@ -1,0 +1,17 @@
+#!/bin/ksh
+
+LOGFILE=/var/log/cron_jobs/backup_kronos.log
+WF=/opt/ooce/bin/wf
+METRIC=backup.kronos.files_transferred
+
+if test -s $LOGFILE
+then
+	FILE_COUNT=$(/bin/grep Downloaded: $LOGFILE | cut -d\  -f2)
+fi
+
+if test -n "$FILE_COUNT"
+then
+	$WF write point -qy wavefront $METRIC $FILE_COUNT
+else
+	$WF write point -qy wavefront $METRIC 0
+fi

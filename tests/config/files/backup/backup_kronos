@@ -1,0 +1,25 @@
+#!/bin/ksh
+
+BACKUP_DIR=/export/backup/kronos
+KRONOS_HOSTNAME=kronos.lan.id264.net
+KRONOS_USERNAME=kronos
+KRONOS_PASSWORD=*****************
+
+# It's OK if the Kronos isn't on. It probably won't be.
+#
+if /usr/sbin/ping $KRONOS_HOSTNAME 1 >/dev/null 2>&1
+then
+	/bin/wget \
+		-P $BACKUP_DIR \
+		-nH \
+		-r \
+		-N \
+		-l inf \
+		-nv \
+		--ftp-user=$KRONOS_USERNAME \
+		--ftp-password=$KRONOS_PASSWORD \
+	ftp://${KRONOS_HOSTNAME}/SSD1
+else
+	print "Kronos is not available"
+	exit 0
+fi

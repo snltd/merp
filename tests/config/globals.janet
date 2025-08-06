@@ -5,8 +5,8 @@
 (def site-smf-method (string site-dir "/lib/smf/method"))
 (def cron-log-dir "/var/log/cron_jobs")
 (def local-domain "lan.id264.net")
-(def big-pool "big")
-(def fast-pool "fast")
+(def big-pool "rpool/test-zone-dataset")
+(def fast-pool "rpool/test-zone-dataset")
 (def workstation-ip "192.168.1.9")
 (def backup-clients ["lobster" "kronos"])
 

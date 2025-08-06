@@ -1,12 +1,19 @@
 (use sh)
 (use judge)
 
-(deftest "builder zone"
+(deftest "basenode"
   (test ($< sharectl get -p nfsmapid_domain nfs) "nfsmapid_domain=lan.id264.net\n")
 
-  (test
-    ($< find /opt/site -type d |sort)
-    "/opt/site\n/opt/site/bin\n/opt/site/etc\n/opt/site/lib\n/opt/site/lib/smf\n/opt/site/lib/smf/manifest\n/opt/site/lib/smf/method\n")
+  (test ($< stat -c %U:%G /opt/site) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site/bin) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site/etc) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site/lib) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site/lib/smf) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site/lib/smf/manifest) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site/lib/smf/method) "root:root\n")
+
+  (test ($< stat -c %U:%G /opt/site) "root:root\n")
+  (test ($< stat -c %U:%G /opt/site) "root:root\n")
 
   (test ($< stat -c %U:%G /export) "root:sys\n")
 
@@ -33,7 +40,7 @@
   (test ($< stat -c "%U:%G %A" /etc/sudoers.d/sudo_group)
     "root:root -r--------\n")
 
-  (test ($? grep -q rob:.*87RM.EPq9/51PZUW /etc/shadow) true)
+  (test ($? grep -q rob:MYPASSWORDHASH /etc/shadow) true)
 
   (def installed-packages (string/split "\n" ($< pkg list -Ho name)))
 
