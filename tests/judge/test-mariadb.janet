@@ -2,7 +2,7 @@
 (use sh)
 
 (deftest "mariadb"
-  (ev/sleep 4)
+  (ev/sleep 20)
 
   (test ($< /bin/pkg list -Ho name |grep mariadb)
         "ooce/database/mariadb-114\nooce/database/mariadb-common\nooce/library/mariadb-114\n")
@@ -45,6 +45,9 @@
 
   (test ($< /bin/stat -c "%U:%G %A" /opt/site/bin/hot_backup)
         "root:root -rwxr-xr-x\n")
+
+  (test ($< /opt/ooce/bin/mysql -u root mysql -e "show databases;")
+        "Database\ninformation_schema\nmysql\nperformance_schema\nsys\ntest\n")
 
   (test ($< zfs list -Ho "name,mountpoint" rpool/test-zone-dataset/backup)
         "rpool/test-zone-dataset/backup\t/backup\n"))

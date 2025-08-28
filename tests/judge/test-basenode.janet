@@ -32,13 +32,13 @@
   (test ($< stat -c "%U:%G %A" /var/log/cron_jobs) "root:daemon drwxrwxr-x\n")
 
   (test ($< cat /etc/default/cron)
-        "CRONLOG=YES\nATH=/bin:/sbin:/usr/sbin:/opt/oo/bin:/opt/ooce/sbin")
+        "CRONLOG=YES\nPATH=/bin:/sbin:/usr/sbin:/opt/oo/bin:/opt/ooce/sbin")
 
   (test ($< svcs -Ho state svc:/system/cron:default)
         "online\n")
 
   (test ($< stat -c "%U:%G %A" /etc/sudoers.d/sudo_group)
-    "root:root -r--------\n")
+        "root:root -r--------\n")
 
   (test ($? grep -q rob:MYPASSWORDHASH /etc/shadow) true)
 
@@ -46,8 +46,5 @@
 
   (test
     (all |(has-value? installed-packages $)
-         ["library/readline"
-          "shell/zsh"
-          "ooce/editor/helix"
-          "ooce/text/ripgrep"
-          "ooce/util/fd"]) true))
+         ["shell/zsh"
+          "ooce/terminal/starship"]) true))

@@ -1,3 +1,4 @@
+(import "../helpers")
 (import "../globals")
 
 (role basenode
@@ -16,10 +17,7 @@
                (directory/ensure globals/site-smf-manifest))
 
       (section packages
-               (pkg/ensure "library/readline")
-               (pkg/ensure "ooce/editor/helix")
-               (pkg/ensure "ooce/text/ripgrep")
-               (pkg/ensure "ooce/util/fd")
+               (pkg/ensure "ooce/terminal/starship")
                (pkg/ensure "shell/zsh"))
 
       (section sudo
@@ -34,13 +32,14 @@
                             :home-dir "/home/rob"
                             :shell "/bin/zsh"
                             :password-hash "MYPASSWORDHASH"
-                            :primary-group "sysadmin"))
+                            :primary-group "sysadmin"
+                            :other-groups ["staff"]))
 
       (section cron
                (file/ensure "/etc/default/cron"
                             :label "crondef"
                             :group "sys"
-                            :content "CRONLOG=YES\nATH=/bin:/sbin:/usr/sbin:/opt/oo/bin:/opt/ooce/sbin")
+                            :content "CRONLOG=YES\nPATH=/bin:/sbin:/usr/sbin:/opt/oo/bin:/opt/ooce/sbin")
                (directory/ensure globals/cron-log-dir
                                  :mode "0775"
                                  :group "daemon")
@@ -48,9 +47,18 @@
                            :state "online"
                            :restarted-by [(this "file" "crondef")]))
 
+      (section gurp-yo-self
+               (let [salt (% (apply + (seq [c :in (hostname)] c)) 15)
+                     minutes (map |(string (+ salt $)) (tuple 0 15 30 45))
+                     my-config (string/replace "/export" "" (dyn :config-file))]
+
+                 (cron/ensure "run gurp"
+                              :minute (string/join minutes ",")
+                              :command (helpers/site-cron "gurp" "apply" "--metrics-to=metrics" my-config))))
+
       (section good-sense
                (file-line/ensure "/etc/profile"
-                                 :label "profile-set-o-vi"
+                                 :label "profile-set-vi"
                                  :line "set -o vi")
                (file-line/ensure "/etc/profile"
                                  :label "profile-path"

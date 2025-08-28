@@ -40,14 +40,16 @@
 
 (def repo-name "sysdef")
 (def startup-method (pathcat globals/site-smf-method (string repo-name "-repo-setup.sh")))
-(def startup-svc (string "svc:/sysdef/application/" repo-name "-setup"))
-(def repo-svc (string "svc:/application/pkg/server:" repo-name))
+(def startup-svc (string "sysdef/application/" repo-name "-setup"))
+(def repo-svc (string "application/pkg/server:" repo-name))
 (def repo-root "/repo")
 (def pkg-log-dir "/var/log/pkg")
 (def refresh-repo-script (pathcat globals/site-bin "refresh-pkg-repo"))
 
 (role pkg-server
-      (zfs/ensure (zfscat globals/fast-pool "pkg")
+      (zfs/ensure (zfscat globals/fast-pool "zone"))
+      (zfs/ensure (zfscat globals/fast-pool "zone" "pkg"))
+      (zfs/ensure (zfscat globals/fast-pool "zone" "pkg" "repo")
                   :properties {:mountpoint repo-root})
 
       (directory/ensure pkg-log-dir
@@ -64,11 +66,10 @@
 
       (section init-repo
                (smf/ensure startup-svc
-                           :svc-name "pkg-setup"
-                           :fmri "sysdef/application/pkg-setup"
+                           :fmri startup-svc
                            :description "transient service to create pkg repo"
                            :duration "transient"
-                           :start-method {:exec startup-method})
+                           (smf-method "start" :exec startup-method))
 
                (file/ensure startup-method
                             :mode "0755"
