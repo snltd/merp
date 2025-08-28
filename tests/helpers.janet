@@ -8,9 +8,9 @@
          (if ,with-dataset
            (zfs/ensure "rpool/test-zone-dataset"
                        :properties {:mountpoint "none"}))
-         (zone/ensure "gurp-test-zone"
+         (zone/ensure "merp-zone"
                       :brand "lipkg"
-                      :clone-from "gurp-template"
+                      :clone-from "merp-template"
                       :autoboot false
                       :recreate 1
                       ;(if ,with-dataset
@@ -31,4 +31,4 @@
            (zfs/remove "rpool/test-zone-dataset"))
 
          (if ,remove-after
-           (zone/remove "gurp-test-zone"))))
+           (zone/remove "merp-zone"))))
