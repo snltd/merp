@@ -1,9 +1,13 @@
 #!/bin/sh -e
 
-# Creates a fresh zone which will be used to clone zones for testing.
+# For multiple Gurp zone configurations, clones the template zone, applies a
+# Gurp configuration, and tests the outcome.
+#
+# Optional arg 1: --debug, sets RUST_LOG to debug and enables --dump-config
 
+TEMPLATE_ZONE="merp-template"
 TEST_ZFS_DATASET="rpool/test-zone-dataset"
-
+TEST_ZONE="merp-zone"
  
 SCRIPT=$(readlink -f $0)
 DIR=${SCRIPT%/*}
@@ -16,7 +20,7 @@ TEST_LIST="$(ls ${DIR}/tests/*wrapper.janet)"
 if [[ $1 == "--debug" ]]
 then
   LEVEL="debug"
-  DEBUG_OPT="--debug"
+  DEBUG_OPT="--dump-config"
   shift
 else
   LEVEL="info"
@@ -25,10 +29,10 @@ fi
 # This gets left behind when tests fail
 if zfs list $TEST_ZFS_DATASET >/dev/null 2>&1
 then
-  if zoneadm -z gurp-test-zone list >/dev/null 2>&1
+  if zoneadm -z $TEST_ZONE list >/dev/null 2>&1
   then
-    print "halting test zone"
-    zoneadm -z gurp-test-zone halt
+    print "halting $TEST_ZONE "
+    zoneadm -z $TEST_ZONE halt
   fi
   
   print "cleaning up $TEST_ZFS_DATASET"
