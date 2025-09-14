@@ -12,7 +12,10 @@
     "root:root -rw-r--r-- 1434\n")
   
   (test ($< /bin/stat -c "%U:%G %A %s" /etc/opt/ooce/minidlna/minidlna.conf)
-    "root:root -rw-r--r-- 190\n")
+    "root:root -rw-r--r-- 174\n")
+
+  (test ($< /usr/bin/md5sum /etc/opt/ooce/minidlna/minidlna.conf)
+    "cbc5ebd3826f23665989af2119fe87a8  /etc/opt/ooce/minidlna/minidlna.conf\n")
 
   (test ($< /bin/svcs -Ho state svc:/sysdef/multimedia/minidlna:default)
     "online\n")

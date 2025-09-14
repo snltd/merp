@@ -20,7 +20,7 @@
         "mysql:mysql drwxr-s---\n")
 
   (test ($< /bin/stat -c "%U:%G %A %s" /etc/opt/ooce/mariadb-11.4/my.cnf)
-        "root:root -rw-r--r-- 546\n")
+        "root:root -rw-r--r-- 547\n")
 
   (test ($< zfs list -Ho "name,mountpoint" rpool/test-zone-dataset/data)
         "rpool/test-zone-dataset/data\t/data\n")

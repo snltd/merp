@@ -12,7 +12,7 @@ TEST_ZONE="merp-zone"
 SCRIPT=$(readlink -f $0)
 DIR=${SCRIPT%/*}
 export GURP_TEST_DIR=$DIR
-GURP_BIN="${DIR}/../gurp/target/debug/gurp"
+GURP_BIN=$(readlink -f "${DIR}/../gurp/target/debug/gurp")
 GURP_FILE="${DIR}/tests/test-basenode.janet"
 
 TEST_LIST="$(ls ${DIR}/tests/*wrapper.janet)"

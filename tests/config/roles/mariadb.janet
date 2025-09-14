@@ -11,12 +11,36 @@
 (def db-group "mysql")
 
 (role mariadb
+      (def mariadb-log-dir "/var/log/mariadb")
+
+      (def my-config
+        {:mysqld
+         {:datadir data-dir
+          :explicit_defaults_for_timestamp true
+          :secure_file_priv ""
+          :server-id 1
+          :innodb_buffer_pool_size "128M"
+          :log_bin 1
+          :max_binlog_size "100M"
+          :expire_logs_days 10
+          :join_buffer_size "128M"
+          :sort_buffer_size "2M"
+          :read_rnd_buffer_size "2M"
+          :slow_query_log 1
+          :slow_query_log_file (pathcat mariadb-log-dir "slow_query.log")
+          :long_query_time 0.25
+          :log_queries_not_using_indexes 1
+          :log_error (pathcat mariadb-log-dir "error.log")
+          :sql_mode "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}})
+
+      (def zfs-pool globals/fast-pool)
+
       (directory/ensure data-dir
                         :owner db-user
                         :group db-group
                         :mode "0700")
 
-      (directory/ensure "/var/log/mariadb"
+      (directory/ensure mariadb-log-dir
                         :owner db-user
                         :group db-group
                         :mode "2750")
@@ -24,11 +48,12 @@
       (file/ensure (string/format "/etc/opt/ooce/mariadb-%d.%d/my.cnf"
                                   major-ver minor-ver)
                    :label "my.cnf"
-                   :from "mariadb/my.cnf")
+                   :from-struct my-config
+                   :to-format "ini")
 
       (pkg/ensure (string/format "ooce/database/mariadb-%d%d" major-ver minor-ver))
 
-      (zfs/ensure (zfscat globals/fast-pool "data")
+      (zfs/ensure (zfscat zfs-pool "data")
                   :properties {:mountpoint data-dir})
 
       (svcprop/ensure (string svc-name ":default")
@@ -39,7 +64,7 @@
                   :state "online")
 
       (section "backup"
-               (zfs/ensure (zfscat globals/big-pool "backup")
+               (zfs/ensure (zfscat zfs-pool "backup")
                            :properties {:mountpoint backup-dir})
 
                (directory/ensure backup-dir
