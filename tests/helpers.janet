@@ -6,7 +6,8 @@
                  :lx-image lx-image
                  :with-dataset with-dataset}]
 
-  (def merp-dir (os/getenv "GURP_TEST_DIR"))
+  (def $merp-dir (gensym))
+  (def $merp-dir (os/getenv "GURP_TEST_DIR"))
 
   ~(role test-controller
          (if ,with-dataset
@@ -18,9 +19,9 @@
                           :final-state "reboot"
                           (zone-attr "kernel-version" :value "4.4")
                           :lx-image ,lx-image
-                          :copy-in {(string ,merp-dir "/template/files/janet") "/usr/bin/janet"
-                                    (string ,merp-dir "/template/files/judge") "/usr/bin/judge"
-                                    (string ,merp-dir "/template/files/jpm_tree") "/usr/lib/janet"}]
+                          :copy-in {(string ,$merp-dir "/template/files/janet") "/usr/bin/janet"
+                                    (string ,$merp-dir "/template/files/judge") "/usr/bin/judge"
+                                    (string ,$merp-dir "/template/files/jpm_tree") "/usr/lib/janet"}]
                          [:brand "lipkg"
                           :clone-from "merp-template"])
                       :autoboot false

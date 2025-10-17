@@ -1,0 +1,6 @@
+#!/usr/bin/env janet
+(put root-env :syspath "/home/rob/work/merp/template/files/jpm_tree/lib")
+
+(import cmd)
+(import judge/runner)
+(cmd/main runner/main)

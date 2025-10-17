@@ -8,16 +8,10 @@ You can read about the reasoning behind it
 - A Gurp executable. By default looks for `../gurp/target/debug/gurp`.
 - Privileges to create, destroy, and clone zones, and to `zlogin` to those
   zones.
-- Native binaries of [Janet](https://janet-lang.org/) and
-  [JPM](https://janet-lang.org/docs/jpm.html).
 - Merp will only work in an OmniOS global zone.
   [Here's how to set one up in AWS](https://omnios.org/setup/aws).
 
 ## Set Things Up
-
-```sh
-$ ./setup-repo.sh # I run this in my dev zone, which has Janet installed:
-```
 
 Edit the network config in `template/functional-test-template.janet` and
 `tests/helpers.janet` to suit your environment.
@@ -52,3 +46,14 @@ as args.
 
 `files/` contains a modified `judge` binary. If judge ever changes, we'll have
 to change this to match.
+
+## Credits
+
+This project bundles the following third-party components:
+
+- [Janet](https://github.com/janet-lang/janet) - MIT License, (c) Calvin Rose
+  and contributors
+- [janet-sh](https://github.com/andrewchambers/janet-sh) - (c) Andrew Chambers
+- [judge](https://github.com/ianthehenry/judge) - MIT License, (c) Ian Henry
+
+See THIRD_PARTY_LICENSES/ for details.
