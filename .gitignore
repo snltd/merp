@@ -1,3 +1,2 @@
-template/files/janet
-template/files/jpm_tree
+*.tested
 tests/**/*fs*
