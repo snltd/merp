@@ -1,4 +1,4 @@
-(import ../globals)
+(import ../site)
 (import ../helpers)
 
 (indoc startup-method-template `
@@ -39,17 +39,17 @@
 `)
 
 (def repo-name "sysdef")
-(def startup-method (pathcat globals/site-smf-method (string repo-name "-repo-setup.sh")))
+(def startup-method (pathcat site/site-smf-method (string repo-name "-repo-setup.sh")))
 (def startup-svc (string "sysdef/application/" repo-name "-setup"))
 (def repo-svc (string "application/pkg/server:" repo-name))
 (def repo-root "/repo")
 (def pkg-log-dir "/var/log/pkg")
-(def refresh-repo-script (pathcat globals/site-bin "refresh-pkg-repo"))
+(def refresh-repo-script (pathcat site/site-bin "refresh-pkg-repo"))
 
 (role pkg-server
-      (zfs/ensure (zfscat globals/fast-pool "zone"))
-      (zfs/ensure (zfscat globals/fast-pool "zone" "pkg"))
-      (zfs/ensure (zfscat globals/fast-pool "zone" "pkg" "repo")
+      (zfs/ensure (zfscat site/fast-pool "zone"))
+      (zfs/ensure (zfscat site/fast-pool "zone" "pkg"))
+      (zfs/ensure (zfscat site/fast-pool "zone" "pkg" "repo")
                   :properties {:mountpoint repo-root})
 
       (directory/ensure pkg-log-dir
