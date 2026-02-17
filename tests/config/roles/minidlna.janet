@@ -1,4 +1,4 @@
-(use ../globals)
+(use ../site)
 
 (def smf-method-path (pathcat site-smf-method "minidlna.sh"))
 (def smf-service "sysdef/multimedia/minidlna")

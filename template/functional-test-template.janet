@@ -8,7 +8,7 @@
       (zone/ensure "merp-template"
                    :brand "lipkg"
                    :autoboot false
-                   (zone-network "merp_net0"
+                   (zone/network "merp_net0"
                                  :allowed-address "192.168.1.199/24"
                                  :defrouter "192.168.1.1")
                    :dns {:domain "lan.id264.net"

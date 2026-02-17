@@ -1,4 +1,4 @@
-(import ../globals)
+(import ../site)
 (use ../helpers)
 
 (def backup-root "/export/backup")
@@ -7,13 +7,13 @@
 (role backup
       (zfs/ensure (zfscat zpool "backup"))
 
-      (loop [client :in globals/backup-clients]
+      (loop [client :in site/backup-clients]
         (zfs/ensure (zfscat zpool client)
                     :properties {:mountpoint (pathcat backup-root client)
                                  :compression "gzip-9"
-                                 :devices "off"
-                                 :setuid "off"
-                                 :exec "off"})
+                                 :devices false
+                                 :setuid false
+                                 :exec false})
 
         (directory/ensure (pathcat backup-root client)
                           :owner "backup"
@@ -21,11 +21,11 @@
                           :mode "0700"))
 
       (section kronos
-               (file/ensure (pathcat globals/site-bin "backup_kronos")
+               (file/ensure (pathcat site/site-bin "backup_kronos")
                             :from "backup/backup_kronos"
                             :mode "0755")
 
-               (file/ensure (pathcat globals/site-bin "backup_kronos_metrics")
+               (file/ensure (pathcat site/site-bin "backup_kronos_metrics")
                             :from "backup/backup_kronos_metrics"
                             :mode "0755")
 

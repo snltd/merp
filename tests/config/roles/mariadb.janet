@@ -1,4 +1,4 @@
-(import ../globals)
+(import ../site)
 (import ../helpers)
 
 (def major-ver 11)
@@ -33,7 +33,7 @@
           :log_error (pathcat mariadb-log-dir "error.log")
           :sql_mode "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"}})
 
-      (def zfs-pool globals/fast-pool)
+      (def zfs-pool site/fast-pool)
 
       (directory/ensure data-dir
                         :owner db-user
@@ -79,7 +79,7 @@
                                  :owner backup-user
                                  :mode "0700")
 
-               (file/ensure (pathcat globals/site-bin "hot_backup")
+               (file/ensure (pathcat site/site-bin "hot_backup")
                             :from "mariadb/mariadb-hot-backup.sh"
                             :mode "0755")
 

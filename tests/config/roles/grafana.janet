@@ -1,4 +1,4 @@
-(import ../globals)
+(import ../site)
 (import ../secrets)
 
 (def zfs-mounter "/etc/init.d/zfs-mount")
@@ -16,7 +16,7 @@
          ```)
 
 (role grafana
-      (def zfs-pool globals/fast-pool)
+      (def zfs-pool site/fast-pool)
 
       (zfs/ensure zfs-pool)
 

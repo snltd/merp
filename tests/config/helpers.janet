@@ -1,22 +1,22 @@
-(import globals)
+(import site)
 
 (defn site-cron
   "Given a script name and optional args, returns a command string which
   executes said script in site-bin and logs to script-name-log in cron-log-dir"
   [cmd-bin & args]
   (argcat
-    (pathcat globals/site-bin cmd-bin)
+    (pathcat site/site-bin cmd-bin)
     (splice args)
     ">"
-    (pathcat globals/cron-log-dir (string cmd-bin ".log"))
+    (pathcat site/cron-log-dir (string cmd-bin ".log"))
     "2>&1"))
 
 (defn ip-of
   "Gives you the IP address of the thing called name"
   [name]
   (def kname (keyword name))
-  (get-in globals/dns-map [:a-records kname]
-          (get-in globals/dns-map [:zones kname])))
+  (get-in site/dns-map [:a-records kname]
+          (get-in site/dns-map [:zones kname])))
 
 (defn sysdef-publisher []
   (publisher/ensure "sysdef" :uri "http://pkg.lan.id264.net/"))
