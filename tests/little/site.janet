@@ -1,1 +1,1 @@
-(def gurp "/home/rob/.cargo/bin/gurp")
+(def gurp "/home/rob/work/gurp/target/debug/gurp")
