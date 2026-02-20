@@ -6,24 +6,21 @@
 
 (def stub-1 "mstub1")
 
-(defn- stub-exists? [stub]
-  ($? dladm show-etherstub ,stub :> [stdout :null] :> [stderr :null]))
-
-(test (stub-exists? stub-1) false)
+(test (etherstub-exists? stub-1) false)
 
 # A noop should do nothing
 (test (apply-changes-noop (resource "etherstub/ensure" stub-1)) 1)
-(test (stub-exists? stub-1) false)
+(test (etherstub-exists? stub-1) false)
 
 # Create a stub. Second apply should show no change
 (test (apply-changes (resource "etherstub/ensure" stub-1)) 1)
-(test (stub-exists? stub-1) true)
+(test (etherstub-exists? stub-1) true)
 (test (apply-changes (resource "etherstub/ensure" stub-1)) 0)
 
 # Noop remove should do nothing but show a change
 (test (apply-changes-noop (resource "etherstub/remove" stub-1)) 1)
-(test (stub-exists? stub-1) true)
+(test (etherstub-exists? stub-1) true)
 
 # Remove
 (test (apply-changes (resource "etherstub/remove" stub-1)) 1)
-(test (stub-exists? stub-1) false)
+(test (etherstub-exists? stub-1) false)

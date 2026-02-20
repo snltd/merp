@@ -53,3 +53,10 @@
   [path]
   ($< stat -c "%U:%G %A" ,path)
 )
+
+(defn etherstub-exists? [stub]
+  ($? dladm show-etherstub ,stub :> [stdout :null] :> [stderr :null]))
+
+(defn bridge-exists? [stub]
+  ($? dladm show-bridge ,stub :> [stdout :null] :> [stderr :null]))
+
