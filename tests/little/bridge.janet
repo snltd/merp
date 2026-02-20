@@ -2,6 +2,8 @@
 (use sh)
 (use ./lib)
 
+(test (in-global))
+
 (def test-bridge "merpbrdg")
 (def stub-1 "mstub1")
 (def stub-2 "mstub2")
