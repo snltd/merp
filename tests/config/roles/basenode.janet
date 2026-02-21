@@ -1,5 +1,14 @@
+<<<<<<< Updated upstream
 (import "../helpers")
+<<<<<<< Updated upstream
 (import "../site")
+=======
+(import "../globals")
+=======
+(import ../helpers)
+(import ../site)
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 (role basenode
       (section nfs

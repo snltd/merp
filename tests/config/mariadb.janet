@@ -2,5 +2,5 @@
 (use roles/mariadb)
 
 (host "mariadb"
-  (basenode)
-  (mariadb))
+      (basenode)
+      (mariadb))

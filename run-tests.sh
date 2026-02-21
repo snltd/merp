@@ -39,6 +39,11 @@ then
   zfs destroy -r $TEST_ZFS_DATASET >/dev/null 2>&1
 fi
 
+print "setting up test Gurp server"
+RUST_LOG=$LEVEL $GURP_BIN apply ${DEBUG_OPT} gurp-server-wrapper.janet || exit 4
+
+exit
+
 if [[ $# == 1 ]]
 then
   TEST_LIST=$@
@@ -46,6 +51,7 @@ fi
 
 for test in $TEST_LIST
 do
-  RUST_LOG=$LEVEL $GURP_BIN apply ${DEBUG_OPT} -L${DIR}/../gurp/janet_src/lib/gurp.janet $test || exit 4
+  print "running $test"
+  RUST_LOG=$LEVEL $GURP_BIN apply ${DEBUG_OPT} $test || exit 5
 done
 

@@ -2,5 +2,5 @@
 (use roles/pkg-server)
 
 (host "pkg-server"
-  (basenode)
-  (pkg-server))
+      (basenode)
+      (pkg-server))
