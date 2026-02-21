@@ -73,3 +73,9 @@
 
 (defn bridge-exists? [stub]
   ($? dladm show-bridge ,stub :> [stdout :null] :> [stderr :null]))
+
+(defn vnic-exists? [vnic]
+  ($? dladm show-vnic ,vnic :> [stdout :null] :> [stderr :null]))
+
+(defn ip-interface-exists? [interface]
+  ($? ipadm show-if ,interface :> [stdout :null] :> [stderr :null]))

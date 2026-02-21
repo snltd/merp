@@ -5,7 +5,7 @@
 # This is one of the few doers that can be tested thoroughly in the Rust code.
 # We only need to do the basics here.
 
-(def dir-1 "/tmp/merp")
+(def dir-1 "/tmp/merp/file-line-test")
 (def file-1 (string dir-1 "/test-file"))
 (def original-content
   `header

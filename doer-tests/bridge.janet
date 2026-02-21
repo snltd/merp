@@ -2,7 +2,7 @@
 (use sh)
 (use ./lib)
 
-(test (in-global))
+(test (in-global) nil)
 
 (def test-bridge "merpbrdg")
 (def stub-1 "mstub1")
