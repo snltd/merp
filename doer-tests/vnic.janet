@@ -44,6 +44,14 @@
 (test (vnic-exists? vnic-1) false)
 (test (ip-interface-exists? ip-interface-1) false)
 
+# Create a VNIC with a VLAN tag
+(test (apply-changes (resource "vnic/ensure" vnic-1
+                               :over physical
+                               :vlan-tag 33)) 1)
+(test ($< dladm show-vnic -p -o "link,over,vid" ,vnic-1) "mvnic1:e1000g0:33\n")
+(test (apply-changes (resource "vnic/remove" vnic-1)) 1)
+(test (vnic-exists? vnic-1) false)
+
 # Fail with an invalid name
 (test (apply-fails (resource "vnic/ensure" "niccy-nic-nic" :over physical)
                    "dladm: invalid link name 'niccy-nic-nic'")
