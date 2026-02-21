@@ -3,7 +3,7 @@
 (use ./lib)
 
 (def dir-1 "/tmp/merp/test-dir")
-(def dir-2 "/tmp/merp/test-dir/inner")
+(def dir-2 (string dir-1 "/inner"))
 
 (test (absent? dir-1) true)
 (test (absent? dir-2) true)
@@ -37,6 +37,18 @@
 (test (apply-changes-noop (resource "directory/remove" dir-1)) 1)
 (test (present? dir-1) true)
 (test (present? dir-2) true)
+
+# A directory cannot clobber a file
+(def blocker (string dir-1 "/blocker"))
+(test (apply-changes (resource "file/ensure" blocker :content "abc")) 1)
+(test (present? blocker) true)
+(test (os/stat blocker :mode) :file)
+(test
+  (apply-fails
+    (resource "directory/ensure" blocker)
+    (string blocker " exists and is not a directory")) true)
+(test (present? blocker) true)
+(test (os/stat blocker :mode) :file)
 
 # The removal of dir-1 will remove dir-2, which is inside it
 (test (apply-changes (resource "directory/remove" dir-1)) 1)
