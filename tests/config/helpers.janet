@@ -26,4 +26,3 @@
 
 (defn my-config [test-role]
   (string (os/getenv "GURP_TEST_DIR") "/tests/zones/" test-role ".janet"))
-

@@ -2,5 +2,5 @@
 (use roles/remover)
 
 (host "remover"
-  (basenode)
-  (remover))
+      (basenode)
+      (remover))
