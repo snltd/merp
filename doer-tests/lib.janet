@@ -56,6 +56,9 @@
        (error (string "expected noop-apply to succeed: failed with\n" $buffer)))
      (parse-changes $buffer)))
 
+(defn cat [& resources]
+  (string/join resources " "))
+  
 (defn resource
   "Build a resource"
   [resource-call & spec]

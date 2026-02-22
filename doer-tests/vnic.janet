@@ -38,8 +38,9 @@
 (test (apply-fails (resource "vnic/remove" vnic-1)
                    "vnic deletion failed: link busy")
       true)
-(test (apply-changes (resource "ip-interface/remove" ip-interface-1)) 1)
-(test (apply-changes (resource "vnic/remove" vnic-1)) 1)
+(test (apply-changes
+        (cat (resource "ip-interface/remove" ip-interface-1)
+             (resource "vnic/remove" vnic-1))) 2)
 (test (vnic-exists? vnic-1) false)
 (test (ip-interface-exists? ip-interface-1) false)
 
@@ -48,6 +49,8 @@
                                :over physical
                                :vlan-tag 33)) 1)
 (test ($< dladm show-vnic -p -o "link,over,vid" ,vnic-1) "mvnic1:e1000g0:33\n")
+ 
+# And remove it
 (test (apply-changes (resource "vnic/remove" vnic-1)) 1)
 (test (vnic-exists? vnic-1) false)
 

@@ -24,12 +24,15 @@
   ($< dladm show-bridge ,test-bridge -p)
   "merpbrdg:stp::32768:\n")
 
-# Create an etherstub to use as a link
-(test (apply-changes (resource "etherstub/ensure" stub-1)) 1)
-(test (etherstub-exists? stub-1) true)
+# Create an etherstub to use as a link, and add it
+(test (etherstub-exists? stub-1) false)
 
 # Add a link. Second should do nothing.
-(test (apply-changes (resource "bridge/ensure" test-bridge :links @[stub-1])) 1)
+(test
+  (apply-changes
+    (cat
+      (resource "bridge/ensure" test-bridge :links @[stub-1])
+      (resource "etherstub/ensure" stub-1))) 2)
 (test
   ($< dladm show-bridge -lp ,test-bridge)
   "mstub1:discarding:0:32768/0\\:0\\:0\\:0\\:0\\:0\n")
@@ -46,18 +49,20 @@
 (test (apply-changes-noop (resource "bridge/remove" test-bridge)) 1)
 (test (bridge-exists? test-bridge) true)
 
-# Remove bridge
-(test (apply-changes (resource "bridge/remove" test-bridge)) 1)
+# Remove bridge and tidy up stubs
+(test (apply-changes
+        (cat (resource "bridge/remove" test-bridge)
+              (resource "etherstub/remove" stub-1)))
+      2)
 (test (bridge-exists? test-bridge) false)
-
-# Tidy up the stubs
-(test (apply-changes (resource "etherstub/remove" stub-1)) 1)
 (test (etherstub-exists? stub-1) false)
 (test (etherstub-exists? stub-2) false)
 
 # Create a new bridge with new values and two links
-(test (apply-changes (resource "etherstub/ensure" stub-1)) 1)
-(test (apply-changes (resource "etherstub/ensure" stub-2)) 1)
+(test
+  (apply-changes
+    (cat (resource "etherstub/ensure" stub-1)
+          (resource "etherstub/ensure" stub-2))) 2)
 (test (etherstub-exists? stub-1) true)
 (test (etherstub-exists? stub-2) true)
 
@@ -84,12 +89,15 @@
   ($< dladm show-bridge -l ,test-bridge -p)
   "mstub1:discarding:0:8192/0\\:0\\:0\\:0\\:0\\:0\nmstub2:discarding:0:8192/0\\:0\\:0\\:0\\:0\\:0\n")
 
-# Remove bridge
-(test (apply-changes (resource "bridge/remove" test-bridge)) 1)
-(test (bridge-exists? test-bridge) false)
+# Remove bridge and stubs
+(test (bridge-exists? test-bridge) true)
 
 # Tidy up the stubs
-(test (apply-changes (resource "etherstub/remove" stub-1)) 1)
-(test (apply-changes (resource "etherstub/remove" stub-2)) 1)
+(test
+  (apply-changes
+    (cat
+      (resource "bridge/remove" test-bridge)
+      (resource "etherstub/remove" stub-1)
+      (resource "etherstub/remove" stub-2))) 3)
 (test (etherstub-exists? stub-1) false)
 (test (etherstub-exists? stub-2) false)
