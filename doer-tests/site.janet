@@ -1,2 +1,5 @@
 (def gurp "/home/rob/work/gurp/target/debug/gurp")
 (def physical "e1000g0")
+(def doer-addr-1 "192.168.1.123")
+(def doer-addr-2 "192.168.1.124")
+(def doer-mask "24")

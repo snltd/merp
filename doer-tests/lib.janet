@@ -85,3 +85,7 @@
 
 (defn ip-interface-exists? [interface]
   ($? ipadm show-if ,interface :> [stdout :null] :> [stderr :null]))
+
+(defn ip-address-exists? [addr-name]
+  ($? ipadm show-addr ,addr-name :> [stdout :null] :> [stderr :null]))
+  
