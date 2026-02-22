@@ -50,8 +50,11 @@
   would be made"
   [input]
   ~(with-syms [$log-line $out]
-     (def $out ($<* @[,site/gurp 'apply '--noop '--exec ,input]))
-     (parse-changes $out)))
+     (def $buffer @"")
+     (def $out ($?* @[,site/gurp 'apply '--noop '--exec ,input :> [stdout $buffer]]))
+     (if-not $out
+       (error (string "expected noop-apply to succeed: failed with\n" $buffer)))
+     (parse-changes $buffer)))
 
 (defn resource
   "Build a resource"

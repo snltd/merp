@@ -4,7 +4,6 @@
 
 (test (in-global) nil)
 
-(def physical "e1000g0")
 (def vnic-1 "mvnic1")
 (def ip-interface-1 vnic-1)
 
