@@ -2,63 +2,43 @@
 (use sh)
 (use ./lib)
 
-(def job-1 "merp-job-1")
-(def job-2 "merp-job-2")
-(def lps-crontab "/var/spool/cron/crontabs/lp")
+(deftest noop-does-nothing
+  (test (apply-changes-noop (gurp-example "cron/ensure-print-cron-job")) 1)
+  (test ($? crontab -l -u "lp" :> [stderr :null]) false))
 
-(def spec-1
-  (resource "cron/ensure" job-1
-            :minute 6
-            :hour 4
-            :day-of-month "*"
-            :day-of-week 5
-            :user "lp"
-            :command "/bin/print-task arg >/dev/null 2>&1"))
+(deftest create-jobs
+  (test
+    (apply-changes
+      (cat (gurp-example "cron/ensure-root-cron-job")
+           (gurp-example "cron/ensure-print-cron-job")))
+    2)
+  (test ($< crontab -l -u "root" |tail -2)
+        "# gurp managed ID /NO-ROLE/cron/root-cron-job\n6 * * * * /bin/thing arg1 arg2 arg3\n")
+  (test ($< crontab -l -u "lp")
+        "# gurp managed ID /NO-ROLE/cron/print-cron-job\n6 4 * * 5 /bin/thing arg1 arg2 arg3\n"))
 
-(def spec-2-1
-  (resource "cron/ensure" job-2
-            :day-of-week 0
-            :user "lp"
-            :command "/bin/batch-job"))
+(deftest modify-job
+  (test (apply-changes
+          (resource
+            "cron/ensure" "root-cron-job"
+            :minute 33
+            :day-of-week 2
+            :command "/bin/thing arg1 arg3")) 1)
+  (test ($< crontab -l -u "root" |tail -2)
+        "# gurp managed ID /NO-ROLE/cron/root-cron-job\n33 * * * 2 /bin/thing arg1 arg3\n"))
 
-(def spec-2-2
-  (resource "cron/ensure" job-2
-            :day-of-week 1
-            :user "lp"
-            :command "/bin/batch-job"))
+(deftest remove-noop-does-nothing
+  (test
+    (apply-changes-noop
+      (resource "cron/remove" "print-cron-job" :user "lp"))
+    1)
+  (test ($< crontab -l -u "lp")
+        "# gurp managed ID /NO-ROLE/cron/print-cron-job\n6 4 * * 5 /bin/thing arg1 arg2 arg3\n"))
 
-# lp doesn't normally have a crontab
-(test (absent? lps-crontab) true)
-
-# Noop does nothing
-(test (apply-changes-noop spec-1) 1)
-(test (absent? lps-crontab) true)
-
-# Create cron job 1
-(test (apply-changes spec-1) 1)
-(test (present? lps-crontab) true)
-(test ($< crontab -l -u lp) "# gurp managed ID /NO-ROLE/cron/merp-job-1\n6 4 * * 5 /bin/print-task arg >/dev/null 2>&1\n")
-
-# Create cron job 2
-(test (apply-changes spec-2-1) 1)
-(test (present? lps-crontab) true)
-(test ($< crontab -l -u lp) "# gurp managed ID /NO-ROLE/cron/merp-job-1\n6 4 * * 5 /bin/print-task arg >/dev/null 2>&1\n# gurp managed ID /NO-ROLE/cron/merp-job-2\n* * * * 0 /bin/batch-job\n")
-
-# Modify cron job 2
-(test (apply-changes spec-2-2) 1)
-(test ($< crontab -l -u lp) "# gurp managed ID /NO-ROLE/cron/merp-job-1\n6 4 * * 5 /bin/print-task arg >/dev/null 2>&1\n# gurp managed ID /NO-ROLE/cron/merp-job-2\n* * * * 1 /bin/batch-job\n")
-(test (apply-changes spec-2-2) 0)
-
-# Remove noop does nothing
-(test (apply-changes-noop (resource "cron/remove" job-1 :user "lp")) 1)
-(test (present? lps-crontab) true)
-(test ($< crontab -l -u lp) "# gurp managed ID /NO-ROLE/cron/merp-job-1\n6 4 * * 5 /bin/print-task arg >/dev/null 2>&1\n# gurp managed ID /NO-ROLE/cron/merp-job-2\n* * * * 1 /bin/batch-job\n")
-
-# Remove cron job 2
-(test (apply-changes (resource "cron/remove" job-2 :user "lp")) 1)
-(test (absent? lps-crontab) false)
-(test ($< crontab -l -u lp) "# gurp managed ID /NO-ROLE/cron/merp-job-1\n6 4 * * 5 /bin/print-task arg >/dev/null 2>&1\n")
-
-# Remove cron job 1
-(test (apply-changes (resource "cron/remove" job-1 :user "lp")) 1)
-(test (absent? lps-crontab) true)
+(deftest cleanup
+  (test (apply-changes
+          (cat (resource "cron/remove" "print-cron-job" :user "lp")
+               (resource "cron/remove" "root-cron-job")))
+        2)
+  (test ($? crontab -l -u "lp" :> [stderr :null]) false)
+  (test ($? crontab -l -u "root" |grep "root-cron-job") false))
