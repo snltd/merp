@@ -2,6 +2,11 @@
 (use sh)
 (import ./site)
 
+(defn gurp-example
+  "Returns a Gurp example, from the gurp codebase. Arg is like 'file/ensure-01'"
+  [example]
+  (string (slurp (string site/example-dir "/" example ".janet"))))
+
 (defn in-global []
   (when (not (= "global\n" ($< /bin/zonename)))
     (eprint "ERROR: not in global zone")
@@ -58,7 +63,7 @@
 
 (defn cat [& resources]
   (string/join resources " "))
-  
+
 (defn resource
   "Build a resource"
   [resource-call & spec]
@@ -88,4 +93,12 @@
 
 (defn ip-address-exists? [addr-name]
   ($? ipadm show-addr ,addr-name :> [stdout :null] :> [stderr :null]))
-  
+
+(defn network-flow-exists? [flow-name]
+  ($? flowadm show-flow ,flow-name :> [stdout :null] :> [stderr :null]))
+
+(defn pkg-is-installed? [pkg]
+  ($? pkg list ,pkg :> [stdout :null] :> [stderr :null]))
+
+(defn publisher-exists? [pub]
+  ($? pkg publisher ,pub :> [stdout :null] :> [stderr :null]))

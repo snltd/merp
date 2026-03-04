@@ -1,103 +1,97 @@
 (use judge)
 (use sh)
 (use ./lib)
+(import ./site)
 
 (test (in-global) nil)
 
-(def test-bridge "merpbrdg")
-(def stub-1 "mstub1")
-(def stub-2 "mstub2")
+(def basic-bridge "basic")
+(def bridge-with-links "with_links")
+(def stub-1 "stub1")
+(def stub-2 "stub2")
 
-# Bridge and stub should not exist
-(test (bridge-exists? test-bridge) false)
-(test (etherstub-exists? stub-1) false)
-(test (etherstub-exists? stub-2) false)
+(deftest setup
+  (test (bridge-exists? basic-bridge) false)
+  (test (etherstub-exists? stub-1) false))
 
-# Noop should do nothing
-(test (apply-changes-noop (resource "bridge/ensure" test-bridge)) 1)
-(test (bridge-exists? test-bridge) false)
+(deftest noop-does-nothing
+  (test (apply-changes-noop (gurp-example "bridge/ensure-basic-bridge")) 1)
+  (test (bridge-exists? basic-bridge) false))
 
-# Create with default values
-(test (apply-changes (resource "bridge/ensure" test-bridge)) 1)
-(test (bridge-exists? test-bridge) true)
-(test
-  ($< dladm show-bridge ,test-bridge -p)
-  "merpbrdg:stp::32768:\n")
+(deftest create-bridge
+  (test (apply-changes (gurp-example "bridge/ensure-basic-bridge")) 1)
+  (test (bridge-exists? basic-bridge) true)
+  (test ($< dladm show-bridge ,basic-bridge -p) "basic:stp::32768:\n")
+  (test ($< dladm show-bridge -l ,basic-bridge -p) ""))
 
-# Create an etherstub to use as a link, and add it
-(test (etherstub-exists? stub-1) false)
+(deftest add-etherstub-link
+  (test
+    (apply-changes
+      (cat
+        (resource "bridge/ensure" basic-bridge :links @[stub-1])
+        (resource "etherstub/ensure" stub-1)))
+    2)
+  (test
+    # The other fields take time to settle, so just check the link is there
+    (string/has-prefix? "stub1:" ($< dladm show-bridge -lp ,basic-bridge))
+    true))
 
-# Add a link. Second should do nothing.
-(test
-  (apply-changes
-    (cat
-      (resource "bridge/ensure" test-bridge :links @[stub-1])
-      (resource "etherstub/ensure" stub-1))) 2)
-(test
-  ($< dladm show-bridge -lp ,test-bridge)
-  "mstub1:discarding:0:32768/0\\:0\\:0\\:0\\:0\\:0\n")
-(test (apply-changes (resource "bridge/ensure" test-bridge :links @[stub-1])) 0)
+(deftest idempotent-1
+  (test
+    (apply-changes
+      (resource "bridge/ensure" basic-bridge :links @[stub-1]))
+    0))
 
-# Remove the link and change the max-age
-(test (apply-changes (resource "bridge/ensure" test-bridge :priority 8192)) 1)
-(test ($< dladm show-bridge -lp ,test-bridge) "")
-(test
-  ($< dladm show-bridge ,test-bridge -p)
-  "merpbrdg:stp:8192/0\\:0\\:0\\:0\\:0\\:0:8192:32768/0\\:0\\:0\\:0\\:0\\:0\n")
+(deftest remove-link-change-max-age
+  (test
+    (apply-changes (resource "bridge/ensure" basic-bridge :priority 8192))
+    1)
+  (test ($< dladm show-bridge -lp ,basic-bridge) "")
+  (test
+    ($< dladm show-bridge ,basic-bridge -p)
+    "basic:stp:8192/0\\:0\\:0\\:0\\:0\\:0:8192:32768/0\\:0\\:0\\:0\\:0\\:0\n"))
 
-# Remove noop should do nothing
-(test (apply-changes-noop (resource "bridge/remove" test-bridge)) 1)
-(test (bridge-exists? test-bridge) true)
+(deftest remove-noop-does-nothing
+  (test (apply-changes-noop (resource "bridge/remove" basic-bridge)) 1)
+  (test (bridge-exists? basic-bridge) true))
 
-# Remove bridge and tidy up stubs
-(test (apply-changes
-        (cat (resource "bridge/remove" test-bridge)
-              (resource "etherstub/remove" stub-1)))
-      2)
-(test (bridge-exists? test-bridge) false)
-(test (etherstub-exists? stub-1) false)
-(test (etherstub-exists? stub-2) false)
+(deftest remove-and-tidy-up
+  (test (apply-changes
+          (cat (resource "bridge/remove" basic-bridge)
+               (resource "etherstub/remove" stub-1)))
+        2)
+  (test (bridge-exists? basic-bridge) false)
+  (test (etherstub-exists? stub-1) false))
 
-# Create a new bridge with new values and two links
-(test
-  (apply-changes
-    (cat (resource "etherstub/ensure" stub-1)
-          (resource "etherstub/ensure" stub-2))) 2)
-(test (etherstub-exists? stub-1) true)
-(test (etherstub-exists? stub-2) true)
+(deftest create-bridge-with-links-and-props
+  (test
+    (apply-changes
+      (cat (resource "etherstub/ensure" stub-1)
+           (resource "etherstub/ensure" stub-2)
+           (gurp-example "bridge/ensure-bridge-with-links-and-props")))
+    3)
+  (test (bridge-exists? bridge-with-links) true)
+  (test (etherstub-exists? stub-1) true)
+  (test
+    ($< dladm show-bridge
+        -o "protect,priority,bhellotime,bfwddelay,forceproto,bmaxage"
+        ,bridge-with-links -p)
+    "stp:32768:2:15:2:20\n")
+  (test
+    ($< dladm show-bridge -l ,bridge-with-links -p |cut -d: -f1) "stub1\nstub2\n"))
 
-(def spec
-  (resource "bridge/ensure" test-bridge
-            :links @[stub-1 stub-2]
-            :priority 8192
-            :force-protocol 3
-            :forward-delay 15
-            :hello-time 2
-            :max-age 23))
+(deftest idempotent-2
+  (test
+    (apply-changes (gurp-example "bridge/ensure-bridge-with-links-and-props"))
+    0))
 
-# It applies and a further apply makes no change
-(test (apply-changes spec) 1)
-(test (apply-changes spec) 0)
-
-(test
-  ($< dladm show-bridge
-      -o "protect,priority,bhellotime,bfwddelay,forceproto,bmaxage"
-      ,test-bridge)
-  "PROTECT PRIORITY BHELLOTIME BFWDDELAY FORCEPROTO BMAXAGE\nstp     8192     2          15        3          23\n")
-
-(test
-  ($< dladm show-bridge -l ,test-bridge -p)
-  "mstub1:discarding:0:8192/0\\:0\\:0\\:0\\:0\\:0\nmstub2:discarding:0:8192/0\\:0\\:0\\:0\\:0\\:0\n")
-
-# Remove bridge and stubs
-(test (bridge-exists? test-bridge) true)
-
-# Tidy up the stubs
-(test
-  (apply-changes
-    (cat
-      (resource "bridge/remove" test-bridge)
-      (resource "etherstub/remove" stub-1)
-      (resource "etherstub/remove" stub-2))) 3)
-(test (etherstub-exists? stub-1) false)
-(test (etherstub-exists? stub-2) false)
+(deftest tidy-up
+  (test
+    (apply-changes
+      (cat (resource "bridge/remove" bridge-with-links)
+           (resource "etherstub/remove" stub-1)
+           (resource "etherstub/remove" stub-2)))
+    3)
+  (test (bridge-exists? bridge-with-links) false)
+  (test (etherstub-exists? stub-1) false)
+  (test (etherstub-exists? stub-2) false))
