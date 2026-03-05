@@ -104,3 +104,10 @@
 
 (defn publisher-exists? [pub]
   ($? pkg publisher ,pub :> [stdout :null] :> [stderr :null]))
+
+(defn group-exists? [group &opt gid]
+  (def pattern (string group ":" (if gid (string ":" gid)) ":"))
+  (truthy? (string/find pattern (slurp "/etc/group"))))
+
+(defn ping? [address]
+  ($? /usr/sbin/ping ,address 1 :> [stdout :null]))
