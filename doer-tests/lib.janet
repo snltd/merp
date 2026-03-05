@@ -42,12 +42,14 @@
 
 (defmacro apply-changes
   "Apply the given input and return the number of changes"
-  [input]
+  [input &opt show-output]
   ~(with-syms [$log-line $out]
      (def $buffer @"")
-     (def $out ($?* @[,site/gurp 'apply '--exec ,input :> [stdout $buffer]]))
+     (def $out ($?* @[,site/gurp 'apply '--dump-diffs '--exec ,input :> [stdout $buffer]]))
      (if-not $out
        (error (string "expected apply to succeed: failed with\n" $buffer)))
+     (if ,show-output
+       (print $buffer))
      (parse-changes $buffer)))
 
 (defmacro apply-changes-noop

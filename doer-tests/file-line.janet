@@ -14,42 +14,35 @@ Gibbus the weasel
 Chubb the pig
 `)
 
-# Error if the file does not exist
-(test
-  (apply-fails
-    (resource "file-line/ensure" file-1 :line "rah")
-    (string file-1 " does not exist: file-line cannot ensure its contents"))
-  true)
+(deftest setup
+  (test
+    (apply-changes (resource "file/ensure" file-1 :content original-content))
+    1))
 
-# Error if the "file" isn't a file
-(test (apply-changes (resource "directory/ensure" dir-1)) 1)
-(test
-  (apply-fails
-    (resource "file-line/ensure" dir-1 :line "rah")
-    (string dir-1 " is not a regular file"))
-  true)
+(deftest no-changes
+  (test
+    (apply-changes (resource "file-line/ensure" file-1 :line "Chubb the pig"))
+    0)
+  (test (= (string (slurp file-1)) original-content) true))
 
-# Setup
-(test (apply-changes (resource "file/ensure" file-1 :content original-content)) 1)
-
-# No changes
-(test (apply-changes (resource "file-line/ensure" file-1 :line "Chubb the pig")) 0)
-(test (= (string (slurp file-1)) original-content) true)
-
-# Add a line
-(test (apply-changes (resource "file-line/ensure" file-1 :line "The Owl")) 1)
-(test
-  (= `header
+(deftest add-a-line
+  (test (apply-changes (resource "file-line/ensure" file-1 :line "The Owl")) 1)
+  (test
+    (= `header
 -------
 Gibbus the weasel
 Chubb the pig
 The Owl
 `)
-  true)
+    true))
 
 # Change the thes
-(test (apply-changes (resource "file-line/ensure" file-1
-                               :replace "the" :with "is a" :apply-to "all")) 1)
+(test
+  (apply-changes (resource "file-line/ensure" file-1
+                           :replace "the"
+                           :with "is a"
+                           :apply-to "all"))
+  1)
 (test
   (= `header
 -------
@@ -59,5 +52,20 @@ The Owl
 `)
   true)
 
-# Tidy up
-(test (apply-changes (resource "directory/remove" dir-1)) 1)
+(deftest tidy-up
+  (test (apply-changes (resource "directory/remove" dir-1)) 1))
+
+(deftest fail-sensibly-if-file-does-not-exist
+  (test
+    (apply-fails
+      (resource "file-line/ensure" file-1 :line "rah")
+      (string file-1 " does not exist: file-line cannot ensure its contents"))
+    true))
+
+(deftest fail-sensibly-if-file-is-not-a-file
+  (test (apply-changes (resource "directory/ensure" dir-1)) 1)
+  (test
+    (apply-fails
+      (resource "file-line/ensure" dir-1 :line "rah")
+      (string dir-1 " is not a regular file"))
+    true))
