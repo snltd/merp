@@ -2,62 +2,59 @@
 (use sh)
 (use ./lib)
 
-(def dir-1 "/tmp/merp/test-dir")
-(def dir-2 (string dir-1 "/inner"))
+(def dir-1 "/example/dir_1")
+(def dir-2 "/example/dir_2")
+(def dir-3 "/example/dir_3")
 
-(test (absent? dir-1) true)
-(test (absent? dir-2) true)
+(deftest noop-does-not-create
+  (test (apply-changes-noop (gurp-example "directory/ensure-default-dir")) 1)
+  (test (absent? dir-1) true))
 
-# Noop should not make a directory
-(test (apply-changes-noop (resource "directory/ensure" dir-1)) 1)
-(test (absent? dir-1) true)
+(deftest all-defaults
+  (test (apply-changes (gurp-example "directory/ensure-default-dir")) 1)
+  (test (present? dir-1) true)
+  (test (metadata dir-1) "root:root drwxr-xr-x\n"))
 
-# Defaults will make directory root:root 0755
-(test (apply-changes (resource "directory/ensure" dir-1)) 1)
-(test (metadata dir-1) "root:root drwxr-xr-x\n")
+(deftest change-owner-and-mode
+  (test (apply-changes
+          (resource "directory/ensure" dir-1 :owner "adm" :mode "0700")) 1)
+  (test (metadata dir-1) "adm:root drwx------\n"))
 
-# Change owner and mode. Noop should do nothing, and re-apply should have no
-# effect
-(def dir-spec (resource "directory/ensure" dir-1 :owner "adm" :mode "0700"))
-(test (apply-changes-noop dir-spec) 1)
-(test (metadata dir-1) "root:root drwxr-xr-x\n")
-(test (apply-changes dir-spec) 1)
-(test (metadata dir-1) "adm:root drwx------\n")
-(test (apply-changes dir-spec) 0)
-(test (metadata dir-1) "adm:root drwx------\n")
+(deftest noop-does-not-remove
+  (test (apply-changes-noop (resource "directory/remove" dir-1)) 1)
+  (test (present? dir-1) true))
 
-# Make a second directory inside the first, fully specced
-(test
-  (apply-changes
-    (resource "directory/ensure" dir-2 :owner "lp" :group "lp" :mode "2700")) 1)
+(deftest create-with-names
+  (test (apply-changes (gurp-example "directory/ensure-with-names")) 1)
+  (test (present? dir-2) true)
+  (test (metadata dir-2) "adm:sys drwx------\n"))
 
-(test (metadata dir-2) "lp:lp drwx--S---\n")
+(deftest idempotent-1
+  (test (apply-changes (gurp-example "directory/ensure-with-names")) 0))
 
-# A noop remove doesn't remove
-(test (apply-changes-noop (resource "directory/remove" dir-1)) 1)
-(test (present? dir-1) true)
-(test (present? dir-2) true)
+(deftest create-with-ids
+  (test (apply-changes (gurp-example "directory/ensure-with-ids")) 1)
+  (test (present? dir-3) true)
+  (test (metadata dir-3) "adm:daemon drwxr-s---\n"))
 
-# A directory cannot clobber a file
-(def blocker (string dir-1 "/blocker"))
-(test (apply-changes (resource "file/ensure" blocker :content "abc")) 1)
-(test (present? blocker) true)
-(test (os/stat blocker :mode) :file)
-(test
-  (apply-fails
-    (resource "directory/ensure" blocker)
-    (string blocker " exists and is not a directory")) true)
-(test (present? blocker) true)
-(test (os/stat blocker :mode) :file)
+(deftest idempotent-2
+  (test (apply-changes (gurp-example "directory/ensure-with-ids")) 0))
 
-# The removal of dir-1 will remove dir-2, which is inside it
-(test (apply-changes (resource "directory/remove" dir-1)) 1)
-(test (absent? dir-1) true)
-(test (absent? dir-2) true)
+(deftest directory-cannot-clobber-file
+  (def blocker (string dir-3 "/blocker"))
+  (test (apply-changes (resource "file/ensure" blocker :content "abc")) 1)
+  (test (present? blocker) true)
+  (test (os/stat blocker :mode) :file)
+  (test
+    (apply-fails
+      (resource "directory/ensure" blocker)
+      (string blocker " exists and is not a directory")) true)
+  (test (present? blocker) true)
+  (test (os/stat blocker :mode) :file))
 
-# This will be left behind
-(test (present? "/tmp/merp") true)
-
-# Tidy up
-(test (apply-changes (resource "directory/remove" "/tmp/merp")) 1)
-(test (absent? "/tmp/merp") true)
+(deftest removal-is-recursive
+  (test (apply-changes (gurp-example "directory/remove-dir")) 1)
+  (test (absent? "/example") true)
+  (test (absent? dir-1) true)
+  (test (absent? dir-2) true)
+  (test (absent? dir-3) true))
