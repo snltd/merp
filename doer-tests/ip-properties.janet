@@ -3,65 +3,50 @@
 (import ./site)
 (use ./lib)
 
-# These are defaults
-(test ($< ipadm show-prop -c -o current -p forwarding ipv4) "off\n")
-(test ($< ipadm show-prop -c -o current -p hoplimit ipv6) "255\n")
-(test ($< ipadm show-prop -c -o current -p max_buf icmp) "262144\n")
-(test ($< ipadm show-prop -c -o current -p sack tcp) "active\n")
-(test ($< ipadm show-prop -c -o current -p extra_priv_ports udp) "2049,4045\n")
-(test ($< ipadm show-prop -c -o current -p max_buf sctp) "1048576\n")
+(defn prop-value [protocol prop]
+  (string/trim ($< ipadm show-prop -c -o current -p ,prop ,protocol)))
 
-# A noop should not change anything
-(test (apply-changes-noop (resource "ip-properties/ensure"  "merp-test"
-    :ipv4 {:forwarding true}
-   :ipv6 {:hoplimit 250}
-   :icmp {:max_buf 262000}
-   :tcp {:sack "passive"}
-   :udp {:extra_priv_ports "2050,4040"}
-   :sctp {:max_buf 1048000})) 6)
-(test ($< ipadm show-prop -c -o current -p forwarding ipv4) "off\n")
-(test ($< ipadm show-prop -c -o current -p hoplimit ipv6) "255\n")
-(test ($< ipadm show-prop -c -o current -p max_buf icmp) "262144\n")
-(test ($< ipadm show-prop -c -o current -p sack tcp) "active\n")
-(test ($< ipadm show-prop -c -o current -p extra_priv_ports udp) "2049,4045\n")
-(test ($< ipadm show-prop -c -o current -p max_buf sctp) "1048576\n")
+(deftest defaults
+  (test (prop-value "ipv4" "forwarding") "off")
+  (test (prop-value "ipv6" "hoplimit") "255")
+  (test (prop-value "icmp" "max_buf") "262144")
+  (test (prop-value "tcp" "sack") "active")
+  (test (prop-value "udp" "extra_priv_ports") "2049,4045")
+  (test (prop-value "sctp" "max_buf") "1048576"))
 
-# Change
-(test (apply-changes (resource "ip-properties/ensure"  "merp-test"
-    :ipv4 {:forwarding true}
-   :ipv6 {:hoplimit 250}
-   :icmp {:max_buf 262000}
-   :tcp {:sack "passive"}
-   :udp {:extra_priv_ports "4040,2050"}
-   :sctp {:max_buf 1048000})) 6)
-(test ($< ipadm show-prop -c -o current -p forwarding ipv4) "on\n")
-(test ($< ipadm show-prop -c -o current -p hoplimit ipv6) "250\n")
-(test ($< ipadm show-prop -c -o current -p max_buf icmp) "262000\n")
-(test ($< ipadm show-prop -c -o current -p sack tcp) "passive\n")
-(test ($< ipadm show-prop -c -o current -p extra_priv_ports udp) "2050,4040\n")
-(test ($< ipadm show-prop -c -o current -p max_buf sctp) "1048000\n")
+(deftest noop-does-nothing
+  (test (apply-changes-noop (gurp-example "ip-properties/ensure-properties")) 6)
+  (test (prop-value "ipv4" "forwarding") "off")
+  (test (prop-value "ipv6" "hoplimit") "255")
+  (test (prop-value "icmp" "max_buf") "262144")
+  (test (prop-value "tcp" "sack") "active")
+  (test (prop-value "udp" "extra_priv_ports") "2049,4045")
+  (test (prop-value "sctp" "max_buf") "1048576"))
 
-# Second change should do nothing
-(test (apply-changes (resource "ip-properties/ensure"  "merp-test"
-    :ipv4 {:forwarding true}
-   :ipv6 {:hoplimit 250}
-   :icmp {:max_buf 262000}
-   :tcp {:sack "passive"}
-   :udp {:extra_priv_ports "2050,4040"}
-   :sctp {:max_buf 1048000})) 0)
+(deftest change-properties
+  (test (apply-changes (gurp-example "ip-properties/ensure-properties")) 6)
+  (test (prop-value "ipv4" "forwarding") "on")
+  (test (prop-value "ipv6" "hoplimit") "250")
+  (test (prop-value "icmp" "max_buf") "262000")
+  (test (prop-value "tcp" "sack") "passive")
+  (test (prop-value "udp" "extra_priv_ports") "2050,4040")
+  (test (prop-value "sctp" "max_buf") "1048000"))
 
-# # Reset
-(test (apply-changes (resource "ip-properties/ensure"  "merp-test"
-  :ipv4 {:forwarding "off"} # use string, we used bool before
-   :ipv6 {:hoplimit 255}
-   :icmp {:max_buf 262144}
-   :tcp {:sack "active"}
-   :udp {:extra_priv_ports "2049,4045"}
-   :sctp {:max_buf 1048576})) 6)
+(deftest idempotemt
+  (test (apply-changes (gurp-example "ip-properties/ensure-properties")) 0))
 
-(test ($< ipadm show-prop -c -o current -p forwarding ipv4) "off\n")
-(test ($< ipadm show-prop -c -o current -p hoplimit ipv6) "255\n")
-(test ($< ipadm show-prop -c -o current -p max_buf icmp) "262144\n")
-(test ($< ipadm show-prop -c -o current -p sack tcp) "active\n")
-(test ($< ipadm show-prop -c -o current -p extra_priv_ports udp) "2049,4045\n")
-(test ($< ipadm show-prop -c -o current -p max_buf sctp) "1048576\n")
+(deftest reset
+  (test (apply-changes (resource "ip-properties/ensure" "merp-test"
+                                 :ipv4 {:forwarding "off"} # use string, we used bool before
+                                 :ipv6 {:hoplimit 255}
+                                 :icmp {:max_buf 262144}
+                                 :tcp {:sack "active"}
+                                 :udp {:extra_priv_ports "2049,4045"}
+                                 :sctp {:max_buf 1048576})) 6)
+
+  (test (prop-value "ipv4" "forwarding") "off")
+  (test (prop-value "ipv6" "hoplimit") "255")
+  (test (prop-value "icmp" "max_buf") "262144")
+  (test (prop-value "tcp" "sack") "active")
+  (test (prop-value "udp" "extra_priv_ports") "2049,4045")
+  (test (prop-value "sctp" "max_buf") "1048576"))
