@@ -2,28 +2,35 @@
 (use sh)
 (use ./lib)
 
-(def group-1 "merpgrp")
+(deftest create-noop-does-nothing
+  (test (group-exists? "new-group") false)
+  (test (apply-changes-noop (gurp-example "group/ensure-new-group")) 1)
+  (test (group-exists? "new-group") false))
 
-# Noop should do nothing
-(test (apply-changes-noop (resource "group/ensure" group-1 :gid 1867)) 1)
-(test ($? grep -q ,group-1 /etc/group) false)
+(deftest create-group
+  (test (apply-changes (gurp-example "group/ensure-new-group")) 1)
+  (test (group-exists? "new-group" 264) true))
 
-# Add a group. Second should make no change nothing
-(test (apply-changes (resource "group/ensure" group-1 :gid 1867)) 1)
-(test (apply-changes (resource "group/ensure" group-1 :gid 1867)) 0)
-(test ($< grep ,group-1 /etc/group) "merpgrp::1867:\n")
+(deftest idempotent-create
+  (test (apply-changes (gurp-example "group/ensure-new-group")) 0))
 
-# Change the GID
-(test (apply-changes (resource "group/ensure" group-1 :gid 1991)) 1)
-(test ($< grep ,group-1 /etc/group) "merpgrp::1991:\n")
+(deftest change-gid
+  (test (apply-changes (resource "group/ensure" "new-group" :gid 1991)) 1)
+  (test (group-exists? "new-group" 1991) true))
 
-# Remove with noop should do nothing
-(test (apply-changes-noop (resource "group/remove" group-1)) 1)
-(test ($< grep ,group-1 /etc/group) "merpgrp::1991:\n")
- 
-# Remove test group
-(test (apply-changes (resource "group/remove" group-1)) 1)
-(test ($? grep -q ,group-1 /etc/group) false)
+(deftest remove-with-noop-does-nothing
+  (test (apply-changes-noop (resource "group/remove" "new-group")) 1)
+  (test (group-exists? "new-group" 1991) true))
 
-# Try to remove a protected group. You're doing this somewhere safe, right?
-(test (apply-fails (resource "group/remove" "root") "protected resource: root") true)
+(deftest remove-group
+  (test (apply-changes (resource "group/remove" "new-group")) 1)
+  (test (group-exists? "new-group") false))
+
+(deftest idempotent-remove
+  (test (apply-changes (resource "group/remove" "new-group")) 0)
+  (test (group-exists? "new-group") false))
+
+(deftest cannot-remove-protected-group
+  # You're doing this somewhere safe, right?
+  (test (apply-fails (resource "group/remove" "root")
+                     "protected resource: root") true))
