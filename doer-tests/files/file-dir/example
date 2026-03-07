@@ -1,0 +1,5 @@
+# This is used to test creation from a file, and also to let that a file does
+# not need to be rewritten if only the serial number changes.
+serial 1772718091
+line1
+line2
