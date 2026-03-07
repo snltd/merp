@@ -111,3 +111,10 @@
 
 (defn ping? [address]
   ($? /usr/sbin/ping ,address 1 :> [stdout :null]))
+
+(defn service-exists? [svc]
+  ($? svcs ,svc :> [stderr :null] :> [stdout :null]))
+
+(defn user-exists? [user]
+  (truthy?
+  (string/find (string/format "\n%s:" user) (slurp "/etc/passwd"))))
