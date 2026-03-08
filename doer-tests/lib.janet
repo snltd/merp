@@ -66,6 +66,9 @@
 (defn cat [& resources]
   (string/join resources " "))
 
+(defn quoted [str]
+  (string "\"" str "\""))
+  
 (defn resource
   "Build a resource"
   [resource-call & spec]
@@ -73,7 +76,7 @@
     "("
     resource-call
     " "
-    (string/join (map |(string/format "%j" $) spec) " ")
+    (string/join (map |(string/format "%j" (eval $)) spec) " ")
     ")"))
 
 (defn metadata
