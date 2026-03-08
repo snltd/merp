@@ -7,6 +7,8 @@
 (def user-1 "appuser")
 (def svc-1 "snltd/example")
 (def manifest-path "/opt/site/lib/smf/manifest/gurp-example.xml")
+(def port-1 8080) # set in example
+(def port-2 9999)
 
 (deftest setup
   (test (apply-changes
@@ -14,7 +16,7 @@
             (resource "directory/ensure" dir-1)
             (resource "file/ensure" (string dir-1 "/method.sh")
                       :mode "0755"
-                      :content "python3 -m http.server")
+                      :content "python3 -m http.server $(svcprop -p application/port snltd/example:default)\n")
             (resource "file/ensure" (string dir-1 "/data")
                       :mode "0755"
                       :content "hello")
@@ -37,7 +39,22 @@
   (os/sleep 5)
   (test (service-exists? svc-1) true)
   (test ($< svcs -Ho state ,svc-1) "online\n")
-  (test ($< curl --connect-timeout=1 -s http://localhost:8000/data) "hello"))
+  (test ($< curl --connect-timeout=1 -s http://localhost:8080/data) "hello"))
+
+(deftest idempotent-1
+  (test (apply-changes (gurp-example "smf/ensure-daemon-with-privs")) 0)
+  (test (service-exists? svc-1) true)
+  (test ($< svcs -Ho state ,svc-1) "online\n"))
+
+# Obviously you wouldn't really do this
+(deftest change-service
+  (test (apply-changes
+          (->> (gurp-example "smf/ensure-daemon-with-privs")
+               (string/replace (string port-1) (string port-2)))) 1)
+  (os/sleep 5)
+  (test (service-exists? svc-1) true)
+  (test ($< svcs -Ho state ,svc-1) "online\n")
+  (test ($< curl --connect-timeout=1 -s http://localhost:9999/data) "hello"))
 
 (deftest cleanup
   (test (apply-changes
@@ -48,4 +65,3 @@
             (resource "user/remove" user-1))) 4)
   (test (absent? dir-1) true)
   (test (user-exists? user-1) false))
-
