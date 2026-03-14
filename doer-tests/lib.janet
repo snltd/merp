@@ -128,3 +128,6 @@
 (defn user-exists? [user]
   (truthy?
   (string/find (string/format "\n%s:" user) (slurp "/etc/passwd"))))
+
+(defn vlan-object-exists? [vlan]
+  ($? dladm show-vlan ,vlan :> [stderr :null] :> [stdout :null]))
