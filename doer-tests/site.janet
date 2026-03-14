@@ -12,3 +12,5 @@
 (def doer-mask "24")
 
 (def scheduler-class "FSS")
+
+(def zfs-root "rpool/example")

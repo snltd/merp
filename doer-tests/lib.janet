@@ -131,3 +131,6 @@
 
 (defn vlan-object-exists? [vlan]
   ($? dladm show-vlan ,vlan :> [stderr :null] :> [stdout :null]))
+
+(defn zfs-exists? [fs]
+  ($? zfs list ,fs :> [stderr :null] :> [stdout :null]))
