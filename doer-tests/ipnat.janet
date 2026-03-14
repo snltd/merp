@@ -32,7 +32,7 @@
   (test (apply-changes-noop
           (resource "ipnat/ensure" "https"
                     :priority 10
-                    :content "map e1000g0 10.77.0.0/24 -> 0/32")) 1)
+                    :content "map e1000g0 10.77.0.0/24 -> 0.0.0.0/32")) 1)
   (test (absent? ipnat-conf) true)
   (test ($? ;curl-cmd) false))
 
@@ -41,14 +41,17 @@
     (apply-changes
       (resource "ipnat/ensure" "https"
                 :priority 10
-                :content (string "map " site/physical " 10.77.0.0/24 -> 0/32"))) 1)
+                :content (string "map " site/physical " 10.77.0.0/24 -> 0.0.0.0/32")))
+    1)
   (test ($? ;curl-cmd) true))
 
-(deftest idempotent
-  (test (apply-changes-noop
-          (resource "ipnat/ensure" "https"
-                    :priority 10
-                    :content "map e1000g0 10.77.0.0/24 -> 0/32")) 0)
+(deftest idempotent-1
+  (test
+    (apply-changes
+      (resource "ipnat/ensure" "https"
+                :priority 10
+                :content (string "map " site/physical " 10.77.0.0/24 -> 0.0.0.0/32")) true)
+    0)
   (test ($? ;curl-cmd) true))
 
 (deftest noop-remove-does-nothing
@@ -60,11 +63,11 @@
 (deftest remove-all-rules-and-interface
   (test (apply-changes
           (cat (resource "ip-address/remove" "lo0/merp")
-               (resource "ipnat/remove" "just-kidding")))
+               (resource "ipnat/remove" "for-real")))
         2)
   (test ($? ;curl-cmd) false)
   (test (absent? ipnat-conf) true))
 
-(deftest remove-does-nothing
+(deftest idempotent-2
   (test (apply-changes
-          (resource "ip-address/remove" "lo0/merp")) 0))
+          (resource "ipnat/remove" "already-gone")) 0))

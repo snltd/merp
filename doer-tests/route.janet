@@ -40,7 +40,7 @@
   (test (truthy? (string/find "Net Unreachable from gateway" buf)) true))
 
 (deftest create-blackhole-route
-  (test (apply-changes (gurp-example "route/ensure-blackhole") true) 1)
+  (test (apply-changes (gurp-example "route/ensure-blackhole")) 1)
   (test ($< netstat -nr |grep "^203.0.113.0")
         "203.0.113.0          127.0.0.1            UB        1          0 lo0       \n")
   (def buf @"")

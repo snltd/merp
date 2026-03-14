@@ -15,17 +15,17 @@
 
 (deftest noop-does-nothing
   (test
-    (apply-changes-noop (gurp-example "network-flow/ensure-01")) 1)
+    (apply-changes-noop (gurp-example "network-flow/ensure-tcp-443-throttle")) 1)
   (test (network-flow-exists? "tls-throttle") false))
 
 (deftest create-example-flow-1
   (test
-    (apply-changes (gurp-example "network-flow/ensure-01")) 1)
+    (apply-changes (gurp-example "network-flow/ensure-tcp-443-throttle")) 1)
   (test (network-flow-exists? "tls-throttle") true))
 
 (deftest idempotent-1
   (test
-    (apply-changes (gurp-example "network-flow/ensure-01")) 0)
+    (apply-changes (gurp-example "network-flow/ensure-tcp-443-throttle")) 0)
   (test (network-flow-exists? "tls-throttle") true))
 
 (deftest remove-noop-does-nothing
