@@ -79,6 +79,13 @@
     (string/join (map |(string/format "%j" (eval $)) spec) " ")
     ")"))
 
+(defn print-resource
+  "Useful for debugging: prints the generated resource before passing it on"
+  [resource-call & spec]
+  (def resource (resource resource-call ;spec))
+  (print resource)
+  resource)
+
 (defn metadata
   "Get owner, group, and mode for a file or directory"
   [path]
