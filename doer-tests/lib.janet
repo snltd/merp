@@ -134,3 +134,6 @@
 
 (defn zfs-exists? [fs]
   ($? zfs list ,fs :> [stderr :null] :> [stdout :null]))
+
+(defn gem-exists? [gem]
+  ($? /opt/ooce/bin/gem contents ,gem :> [stderr :null] :> [stdout :null]))
