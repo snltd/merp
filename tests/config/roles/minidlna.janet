@@ -1,4 +1,4 @@
-(use ../globals)
+(use ../site)
 
 (def smf-method-path (pathcat site-smf-method "minidlna.sh"))
 (def smf-service "sysdef/multimedia/minidlna")
@@ -29,11 +29,11 @@
       (smf/ensure smf-service
                   :fmri smf-service
                   :description "MiniDLNA - DLNA/UPnP-AV media server"
-                  (smf-method "start"
+                  (smf/method "start"
                               :exec smf-method-path
                               :user "minidlna"
                               :group "minidlna")
-                  (smf-method "refresh"
+                  (smf/method "refresh"
                               :exec smf-method-path
                               :user "minidlna"
                               :group "minidlna")))

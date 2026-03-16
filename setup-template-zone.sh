@@ -10,4 +10,4 @@ GURP_BIN="${DIR}/../gurp/target/debug/gurp"
 GURP_FILE="${DIR}/template/functional-test-template.janet"
  
 "$GURP_BIN" apply "$GURP_FILE"
-
+"$GURP_BIN" apply "${DIR}/template/network.janet"

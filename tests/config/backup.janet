@@ -2,5 +2,5 @@
 (use roles/backup)
 
 (host "backup"
-  (basenode)
-  (backup))
+      (basenode)
+      (backup))

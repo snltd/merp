@@ -1,5 +1,14 @@
+<<<<<<< Updated upstream
 (import "../helpers")
+<<<<<<< Updated upstream
+(import "../site")
+=======
 (import "../globals")
+=======
+(import ../helpers)
+(import ../site)
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 (role basenode
       (section nfs
@@ -10,11 +19,11 @@
                (directory/ensure "/export/home"))
 
       (section site-dirs
-               (directory/ensure globals/site-dir)
-               (directory/ensure globals/site-bin)
-               (directory/ensure globals/site-etc)
-               (directory/ensure globals/site-smf-method)
-               (directory/ensure globals/site-smf-manifest))
+               (directory/ensure site/site-dir)
+               (directory/ensure site/site-bin)
+               (directory/ensure site/site-etc)
+               (directory/ensure site/site-smf-method)
+               (directory/ensure site/site-smf-manifest))
 
       (section packages
                (pkg/ensure "ooce/terminal/starship")
@@ -40,7 +49,7 @@
                             :label "crondef"
                             :group "sys"
                             :content "CRONLOG=YES\nPATH=/bin:/sbin:/usr/sbin:/opt/oo/bin:/opt/ooce/sbin")
-               (directory/ensure globals/cron-log-dir
+               (directory/ensure site/cron-log-dir
                                  :mode "0775"
                                  :group "daemon")
                (svc/ensure "cron"

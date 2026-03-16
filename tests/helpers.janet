@@ -17,7 +17,7 @@
                       ;(if ,lx-image
                          [:brand "lx"
                           :final-state "reboot"
-                          (zone-attr "kernel-version" :value "4.4")
+                          (zone/attr "kernel-version" :value "4.4")
                           :lx-image ,lx-image
                           :copy-in {(string ,$merp-dir "/template/files/janet") "/usr/bin/janet"
                                     (string ,$merp-dir "/template/files/judge") "/usr/bin/judge"
@@ -28,9 +28,9 @@
                       :recreate 1
                       ;(if ,with-dataset
                          [:datasets ["rpool/test-zone-dataset"]] [])
-                      (zone-fs "/var/tmp/tests"
+                      (zone/fs "/var/tmp/tests"
                                :special (string (os/getenv "GURP_TEST_DIR") "/tests"))
-                      (zone-network "t_gurp_net0"
+                      (zone/network "t_gurp_net0"
                                     :allowed-address "192.168.1.199/24"
                                     :defrouter "192.168.1.1")
                       :dns {:domain "lan.id264.net"
