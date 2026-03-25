@@ -1,0 +1,1 @@
+{:dependencies @[] :version "0.0.0" :paths @["/merp/vendor/lib/janet/pkgs.janet"] :url "https://github.com/janet-lang/pkgs.git" :tag "36e69933328cc7ac98ac8d59fca315906cd82384" :type :git}
