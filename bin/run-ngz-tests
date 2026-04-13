@@ -1,0 +1,24 @@
+#!/bin/sh -e
+
+# These tests can run in any native zone
+
+PATH=/merp/vendor/bin:/bin:/usr/bin
+ 
+cd /merp/doer-tests
+
+judge -v \
+	./cron.janet \
+	./directory.janet \
+	./file-line.janet \
+	./file.janet \
+	./gem.janet \
+	./group.janet \
+	./lib.janet \
+	./link.janet \
+	./pkg.janet \
+	./publisher.janet \
+	./smf.janet \
+	./svc.janet \
+	./svcprop.janet \
+	./system-cert.janet \
+	./user.janet 
