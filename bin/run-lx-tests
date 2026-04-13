@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+# Only the apk doer is lx-specific
+
+PATH=/merp/vendor/bin:/bin:/usr/bin
+ 
+cd /merp/doer-tests
+
+judge -v \
+	./apk.janet 

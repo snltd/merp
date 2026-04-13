@@ -19,19 +19,19 @@
   (test (ip-address-exists? addr-1) false)
   (test (apply-changes-noop
           (resource "ip-address/ensure" addr-1
-                    :address (string site/doer-addr-1 "/" site/doer-mask)
+                    :address (string site/doer-addr-1 "/" site/netmask)
                     :type "static")) 1)
   (test (ip-address-exists? addr-1) false))
 
 (deftest create-address
   (test (apply-changes
           (resource "ip-address/ensure" addr-1
-                    :address (string site/doer-addr-1 "/" site/doer-mask)
+                    :address (string site/doer-addr-1 "/" site/netmask)
                     :type "static")) 1)
   (test (ip-address-exists? addr-1) true)
   (test (apply-changes
           (resource "ip-address/ensure" addr-1
-                    :address (string site/doer-addr-1 "/" site/doer-mask)
+                    :address (string site/doer-addr-1 "/" site/netmask)
                     :type "static")) 0)
   (test (ip-address-exists? addr-1) true)
   (test (ping? site/doer-addr-1) true))
@@ -40,7 +40,7 @@
   (test ($< ipadm show-addrprop ,addr-1 -c -o current -p private) "off\n")
   (test (apply-changes
           (resource "ip-address/ensure" addr-1
-                    :address (string site/doer-addr-2 "/" site/doer-mask)
+                    :address (string site/doer-addr-2 "/" site/netmask)
                     :properties {:private true}
                     :type "static")) 1)
   (test ($< ipadm show-addrprop ,addr-1 -c -o current -p private) "on\n")

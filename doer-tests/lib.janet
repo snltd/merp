@@ -2,10 +2,15 @@
 (use sh)
 (import ./site)
 
+(defn pathcat [& chunks]
+  (->
+    (map |(string/trim $ "/") (tuple "" ;chunks))
+    (string/join "/")))
+
 (defn gurp-example
   "Returns a Gurp example, from the gurp codebase. Arg is like 'file/ensure-01'"
   [example]
-  (string (slurp (string site/example-dir "/" example ".janet"))))
+  (string (slurp (pathcat site/example-dir (string example ".janet")))))
 
 (defn in-global []
   (when (not (= "global\n" ($< /bin/zonename)))
@@ -32,43 +37,45 @@
   "Apply the given input, which is expected to fail, with 'pattern' in the
   Gurp output"
   [input pattern]
-  ~(with-syms [$buffer $out]
-     (def $buffer @"")
-     (def $out ($?* @[,site/gurp 'apply '--exec ,input :> [stdout $buffer]]))
-     (if-not (string/find ,pattern $buffer)
+  ~(do
+     (def buf @"")
+     (def out ($?* @[,site/gurp 'apply '--exec ,input :> [stdout buf]]))
+     (if-not (string/find ,pattern buf)
        (error
-         (string "did not find '" ,pattern "' in Gurp output:\n" $buffer)))
-     (= $out false)))
+         (string "did not find '" ,pattern "' in Gurp output:\n" buf)))
+     (= out false)))
 
 (defmacro apply-changes
   "Apply the given input and return the number of changes"
   [input &opt show-output]
-  ~(with-syms [$log-line $out]
-     (def $buffer @"")
-     (def $out ($?* @[,site/gurp 'apply '--dump-diffs '--exec ,input :> [stdout $buffer]]))
-     (if-not $out
-       (error (string "expected apply to succeed: failed with\n" $buffer)))
+  ~(do
+     (def buf @"")
+     (def out
+       ($?* @[,site/gurp 'apply '--dump-diffs '--exec ,input :> [stdout buf]]))
+     (if-not out
+       (error (string "expected apply to succeed: failed with\n" buf)))
      (if ,show-output
-       (print $buffer))
-     (parse-changes $buffer)))
+       (print buf))
+     (parse-changes buf)))
 
 (defmacro apply-changes-noop
   "Apply the given input with a noop and return the number of changes that
   would be made"
   [input]
-  ~(with-syms [$log-line $out]
-     (def $buffer @"")
-     (def $out ($?* @[,site/gurp 'apply '--noop '--exec ,input :> [stdout $buffer]]))
-     (if-not $out
-       (error (string "expected noop-apply to succeed: failed with\n" $buffer)))
-     (parse-changes $buffer)))
+  ~(do
+     (def buf @"")
+     (def out
+       ($?* @[,site/gurp 'apply '--noop '--exec ,input :> [stdout buf]]))
+     (if-not out
+       (error (string "expected noop-apply to succeed: failed with\n" buf)))
+     (parse-changes buf)))
 
 (defn cat [& resources]
   (string/join resources " "))
 
 (defn quoted [str]
   (string "\"" str "\""))
-  
+
 (defn resource
   "Build a resource"
   [resource-call & spec]
@@ -115,6 +122,10 @@
 (defn publisher-exists? [pub]
   ($? pkg publisher ,pub :> [stdout :null] :> [stderr :null]))
 
+(defn publisher-mirror-exists? [pub mirror]
+  (def grep-string (string/format "^%s *mirror *online F %s$" pub mirror))
+  ($? pkg publisher |grep -q ,grep-string))
+
 (defn group-exists? [group &opt gid]
   (def pattern (string group ":" (if gid (string ":" gid)) ":"))
   (truthy? (string/find pattern (slurp "/etc/group"))))
@@ -127,7 +138,7 @@
 
 (defn user-exists? [user]
   (truthy?
-  (string/find (string/format "\n%s:" user) (slurp "/etc/passwd"))))
+    (string/find (string/format "\n%s:" user) (slurp "/etc/passwd"))))
 
 (defn vlan-object-exists? [vlan]
   ($? dladm show-vlan ,vlan :> [stderr :null] :> [stdout :null]))
@@ -137,3 +148,9 @@
 
 (defn gem-exists? [gem]
   ($? /opt/ooce/bin/gem contents ,gem :> [stderr :null] :> [stdout :null]))
+
+(defn apk-is-installed? [pkg]
+  (not (empty? ($< /sbin/apk list -I ,pkg))))
+
+(defn pkgin-is-installed? [pkg]
+  ($? /opt/local/bin/pkgin list |grep -q ,pkg))

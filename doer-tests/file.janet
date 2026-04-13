@@ -6,11 +6,11 @@
 # Rust code, so here we'll focus on higher-level behaviour.
 
 (def dir-1 "/example/file")
-(def file-1 (string dir-1 "/from-content")) # ensure-from-content.janet
-(def file-2 (string dir-1 "/from-url")) # ensure-from-url-with-checksum.janet
-(def file-3 (string dir-1 "/from-local-file")) # ensure-from-path
-(def file-5 (string dir-1 "/test-file-struct-1"))
-(def file-6 (string dir-1 "/test-file-kvp"))
+(def file-1 (pathcat dir-1 "from-content")) # ensure-from-content.janet
+(def file-2 (pathcat dir-1 "from-url")) # ensure-from-url-with-checksum.janet
+(def file-3 (pathcat dir-1 "from-local-file")) # ensure-from-path
+(def file-5 (pathcat dir-1 "test-file-struct-1"))
+(def file-6 (pathcat dir-1 "test-file-kvp"))
 
 (deftest setup
   (test (absent? dir-1) true)
@@ -26,7 +26,7 @@
   (test (apply-changes (gurp-example "file/ensure-from-content")) 1)
   (test (present? file-1) true)
   (test (metadata file-1) "sys:root -rw-------\n")
-  (test (slurp file-1) @"words and stuff"))
+  (test (slurp file-1) @"words\n and\nstuff\n"))
 
 (deftest idempotent-1
   (test (apply-changes (gurp-example "file/ensure-from-content")) 0))
@@ -34,9 +34,9 @@
 (deftest change-content
   (test (apply-changes
           (->> (gurp-example "file/ensure-from-content")
-               (string/replace "words and stuff" "different words")))
+               (string/replace "stuff" "whatnot")))
         1)
-  (test (slurp file-1) @"different words")
+  (test (slurp file-1) @"words\n and\nwhatnot\n")
   (test (metadata file-1) "sys:root -rw-------\n"))
 
 (deftest change-group-and-mode
@@ -75,7 +75,7 @@
   (test (apply-fails
           (->> (gurp-example "file/ensure-from-url-with-checksum")
                (string/replace "LICENSE.txt" "NO-SUCH-THING"))
-          "failed to fetch file")
+          "http status: 404")
         true))
 
 (deftest fails-if-parent-is-not-a-dir
@@ -173,7 +173,7 @@
   (test (slurp backup-file-5) @"a: 1\nb: 2\nc: string\nd:\n- 1\n- 2\n- 3\n- 4\n"))
 
 (deftest file-cannot-clobber-directory
-  (def blocker (string dir-1 "/blocker"))
+  (def blocker (pathcat dir-1 "blocker"))
   (test (apply-changes (resource "directory/ensure" blocker)) 1)
   (test (present? blocker) true)
   (test (os/stat blocker :mode) :directory)

@@ -1,0 +1,35 @@
+#!/bin/sh -e
+
+# All tests which are not brand-specific. Many of these require a global zone.
+
+PATH=/merp/vendor/bin:/bin:/usr/bin
+ 
+cd /merp/doer-tests
+
+judge -v \
+	./bridge.janet \
+	./cron.janet \
+	./directory.janet \
+	./etherstub.janet \
+	./file-line.janet \
+	./file.janet \
+	./gem.janet \
+	./group.janet \
+	./ip-address.janet \
+	./ip-interface.janet \
+	./ip-properties.janet \
+	./ipfilter.janet \
+	./ipnat.janet \
+	./link.janet \
+	./misc.janet \
+	./network-flow.janet \
+	./pkg.janet \
+	./publisher.janet \
+	./route.janet \
+	./smf.janet \
+	./svc.janet \
+	./svcprop.janet \
+	./user.janet \
+	./vlan.janet \
+	./vnic.janet \
+	./zfs.janet 

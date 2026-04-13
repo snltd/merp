@@ -1,0 +1,8 @@
+#!/merp/vendor/bin/janet
+#!/usr/bin/env janet
+(put root-env :syspath "/merp/vendor/lib/janet")
+(import jpm/cli)
+# Reset the syspath after overriding
+(put root-env :syspath (os/getenv "JANET_PATH" (dyn :syspath)))
+(defn main [& argv]
+  (cli/main ;argv))

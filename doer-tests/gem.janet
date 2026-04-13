@@ -11,7 +11,9 @@
 (def system-gem "/opt/ooce/bin/gem")
 
 (deftest setup
-  (test (truthy? (apply-changes (resource "pkg/ensure" "ruby-34"))) true))
+  (test
+    (truthy?
+      (apply-changes (resource "pkg/ensure" "ooce/runtime/ruby-34"))) true))
 
 (deftest noop-does-nothing
   (test (gem-exists? gem-1) false)

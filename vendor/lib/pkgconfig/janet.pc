@@ -1,0 +1,12 @@
+prefix=/merp/vendor
+exec_prefix=${prefix}
+includedir=/merp/vendor/include/janet
+libdir=/merp/vendor/lib
+
+Name: janet
+Url: https://janet-lang.org
+Description: Library for the Janet programming language.
+Version: 1.41.2
+Cflags: -I${includedir}
+Libs: -L${libdir} -ljanet
+Libs.private: -lsocket -lm

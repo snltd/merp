@@ -1,0 +1,1 @@
+{:dependencies @["https://github.com/andrewchambers/janet-posix-spawn.git"] :version "0.0.0" :paths @["/merp/vendor/lib/janet//_sh.so" "/merp/vendor/lib/janet//_sh.meta.janet" "/merp/vendor/lib/janet//_sh.a" "/merp/vendor/lib/janet/sh.janet"] :url "https://github.com/andrewchambers/janet-sh.git" :tag "221bcc869bf998186d3c56a388c8313060bfd730" :type :git}

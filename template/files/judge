@@ -1,6 +1,0 @@
-#!/usr/bin/env janet
-(put root-env :syspath "/usr/lib/janet/lib")
-
-(import cmd)
-(import judge/runner)
-(cmd/main runner/main)

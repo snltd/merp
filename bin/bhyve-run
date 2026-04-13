@@ -1,0 +1,6 @@
+#!/bin/sh
+
+MERP_ROOT=$(readlink -e ${0%/*}/..)
+ZONE_IP=$(sed -n '/global-test-zone-ip/s/.*\"\(.*\)\".*/\1/p' ${MERP_ROOT}/zones/site.janet)
+
+ssh root@${ZONE_IP} /merp/bin/run-ngz-tests

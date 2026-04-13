@@ -11,45 +11,49 @@ You can read about the reasoning behind it
 - Merp will only work in an OmniOS global zone.
   [Here's how to set one up in AWS](https://omnios.org/setup/aws).
 
-## Set Things Up
+## Running Tests
 
-Edit the network config in `template/functional-test-template.janet` and
-`tests/helpers.janet` to suit your environment.
+Merp has two actions: small self-contained doer tests, and a big test which
+builds a reasonably complex system using most of Gurp's features.
 
-Then in the global zone:
+### 1. Doer Tests
 
-```
-# ./setup-template-zone.sh
-```
+Merp tests each of
+[Gurp's doers](https://github.com/snltd/gurp/tree/main/doc/doers) more-or-less
+in isolation. Different doers require different zone types. For instance, you
+can only set the kernel scheduler class in the global zone; you can only install
+APK packages in an Apline LX zone, and so-on.
 
-This installs a zone which will be cloned by the tests.
+Merp uses Gurp to create a sandbox zone and execute the appropriate class of
+tests inside it.
 
-## Run The Tests
-
-Note that this will create a ZFS dataset `rpool/test-zone-dataset`, which Gurp
-will destroy after use.
+Put the `gurp` binary you want to test at the start of your `$PATH`.
 
 ```sh
-$ ./run-tests.sh
+$ PATH=/path/to/gurp:$PATH
 ```
 
-Expect each zone to take 30s to a couple of minutes, depending on the packages
-it adds.
+And then you can run tests in a sandbox zone of the appropriate type.
 
-You can pass `--debug` as the first argument. This will set `RUST_LOG=debug` and
-pass `--dump-config` to Gurp. It produces a lot of output.
+```sh
+$ gurp apply zones/native-doer-tests.janet  # lipkg zone
+$ gurp apply zones/lx-doer-tests.janet      # lx zone
+$ gurp apply zones/pkgsrc-doer-tests.janet  # pkgin zone
+$ gurp apply zones/global-doer-tests.janet  # bhyve zone
+```
 
-You can also specify one or more tests to run. Pass `tests/<host>-wrapper.janet`
-as args.
+All these create the zone, run the tests, then remove the zone. If you want to
+keep the zone around for further debugging, comment out the `(zone/remove)`
+entry. Should anything get stuck and you want to clean up, run the same commands
+but with the `--destroy-everything-you-touch` flag.
 
-## Note
+Note that the native zone is cloned, so repeat tests can be run quickly, but Gurp must first create the gold zone. This might take a while depending on your connection to the OmniOS packages servers, or whether you have a local mirror. The gold zone is NOT cleaned up automatically.
 
-`files/` contains a modified `judge` binary. If judge ever changes, we'll have
-to change this to match.
+## 2. Infrastructure Test
 
 ## Credits
 
-This project bundles the following third-party components:
+This project bundles, in `vendor/`, the following third-party components:
 
 - [Janet](https://github.com/janet-lang/janet) - MIT License, (c) Calvin Rose
   and contributors

@@ -1,2 +1,4 @@
 *.tested
 tests/**/*fs*
+.cache
+vendor/**/.git*

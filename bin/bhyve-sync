@@ -1,0 +1,17 @@
+#!/bin/sh
+
+GURP_ZONE_DIR="/gurp/target/debug"
+MERP_ROOT=$(readlink -e ${0%/*}/..)
+ZONE_IP=$(sed -n '/global-test-zone-ip/s/.*\"\(.*\)\".*/\1/p' ${MERP_ROOT}/zones/site.janet)
+GURP_BIN=$(readlink -e ${MERP_ROOT}/..${GURP_ZONE_DIR}/gurp)
+GURP_JANET_DIR="/gurp/janet"
+GURP_EXAMPLES=$(readlink -e ${MERP_ROOT}/..${GURP_JANET_DIR}/examples)
+
+# Copy Merp
+rsync -av -e ssh $MERP_ROOT root@${ZONE_IP}:/
+
+# Send over the bits of Gurp that Merp requires.
+
+ssh root@${ZONE_IP} mkdir -p $GURP_ZONE_DIR
+rsync -av -e ssh $GURP_BIN root@${ZONE_IP}:${GURP_ZONE_DIR}/
+rsync -av -e ssh $GURP_EXAMPLES root@${ZONE_IP}:${GURP_JANET_DIR}/
