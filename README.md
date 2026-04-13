@@ -24,22 +24,22 @@ in isolation. Different doers require different zone types. For instance, you
 can only set the kernel scheduler class in the global zone; you can only install
 APK packages in an Apline LX zone, and so-on.
 
-### 1.1 Running Doer Tests Which do not Require a Global Zone
-
 Merp uses Gurp to create a sandbox zone and execute the appropriate class of
 tests inside it.
 
-From an OmniOS global zone:
+Put the `gurp` binary you want to test at the start of your `$PATH`.
 
 ```sh
 $ PATH=/path/to/gurp:$PATH
-# Test everything which is testable in a non-global zone. This also creates a
-# "gold zone" from which the test zone is cloned.
-$ gurp apply zones/ngz-doer-tests.janet
-# Test APK doer in an Alpine zone
-$ gurp apply zones/lx-doer-tests.janet
-# Tests the pkgin doer
-$ gurp apply zones/pkgsrc-doer-tests.janet
+```
+
+And then you can run tests in a sandbox zone of the appropriate type.
+
+```sh
+$ gurp apply zones/native-doer-tests.janet  # lipkg zone
+$ gurp apply zones/lx-doer-tests.janet      # lx zone
+$ gurp apply zones/pkgsrc-doer-tests.janet  # pkgin zone
+$ gurp apply zones/global-doer-tests.janet  # bhyve zone
 ```
 
 All these create the zone, run the tests, then remove the zone. If you want to
@@ -47,43 +47,9 @@ keep the zone around for further debugging, comment out the `(zone/remove)`
 entry. Should anything get stuck and you want to clean up, run the same commands
 but with the `--destroy-everything-you-touch` flag.
 
-### 1.1 Running Doer Tests Which Require a Global Zone
+Note that the native zone is cloned, so repeat tests can be run quickly, but Gurp must first create the gold zone. This might take a while depending on your connection to the OmniOS packages servers, or whether you have a local mirror. The gold zone is NOT cleaned up automatically.
 
-The tests are as safe and non-invasive as I could make them, and I am happy
-enough to run them in the global zone of my development machine.
-
-### BELOW IS FOR EDIT
-
-## Set Things Up
-
-Edit the network config in `template/functional-test-template.janet` and
-`tests/helpers.janet` to suit your environment.
-
-Then in the global zone:
-
-```
-# ./setup-template-zone.sh
-```
-
-This installs a zone which will be cloned by the tests.
-
-## Run The Tests
-
-Note that this will create a ZFS dataset `rpool/test-zone-dataset`, which Gurp
-will destroy after use.
-
-```sh
-$ ./run-tests.sh
-```
-
-Expect each zone to take 30s to a couple of minutes, depending on the packages
-it adds.
-
-You can pass `--debug` as the first argument. This will set `RUST_LOG=debug` and
-pass `--dump-config` to Gurp. It produces a lot of output.
-
-You can also specify one or more tests to run. Pass `tests/<host>-wrapper.janet`
-as args.
+## 2. Infrastructure Test
 
 ## Credits
 
@@ -95,45 +61,3 @@ This project bundles, in `vendor/`, the following third-party components:
 - [judge](https://github.com/ianthehenry/judge) - MIT License, (c) Ian Henry
 
 See THIRD_PARTY_LICENSES/ for details.
-
-## Update the Dependencies
-
-Copy in a new Janet binary and regenerate the `jpm_tree`.
-
-```sh
-$ cp `which janet` gold-zone/files/
-$ cd gold-zone/files
-$ jpm install --local
-```
-
-## Run the NGZ Doer Tests
-
-```sh
-$ gurp apply  ./gold-zone/ngz-doer-tests.janet
-```
-
-Clean up:
-
-```sh
-$ gurp apply --destroy-everything-you-touch ./gold-zone/ngz-doer-tests.janet
-```
-
-## Install vendor dir
-
-Make sure the `merp` directory is symlinked to root, so `cd /merp` puts you
-inside it.
-
-Download and unpack the Janet source code somewhere, and from inside it:
-
-```sh
-$ PREFIX=/merp/vendor gmake install
-```
-
-Make sure you don't have any `JANET_` env vars set.
-
-Clone the `jpm` source, and from inside it
-
-```sh
-$ /merp/vendor/bin/janet bootstrap.janet
-$ /merp/vendor/bin/jpm install sh judge
-```
