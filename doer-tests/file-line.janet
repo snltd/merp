@@ -6,7 +6,7 @@
 # We only need to do the basics here.
 
 (def dir-1 "/tmp/merp/file-line-test")
-(def file-1 (string dir-1 "/test-file"))
+(def file-1 (pathcat dir-1 "test-file"))
 (def original-content
   `header
 -------
@@ -16,8 +16,11 @@ Chubb the pig
 
 (deftest setup
   (test
-    (apply-changes (resource "file/ensure" file-1 :content original-content))
-    1))
+    (apply-changes
+      (cat
+        (resource "directory/ensure" dir-1)
+        (resource "file/ensure" file-1 :content original-content)))
+    2))
 
 (deftest no-changes
   (test
@@ -38,10 +41,11 @@ The Owl
 
 # Change the thes
 (test
-  (apply-changes (resource "file-line/ensure" file-1
-                           :replace "the"
-                           :with "is a"
-                           :apply-to "all"))
+  (apply-changes
+    (resource "file-line/ensure" file-1
+              :replace "the"
+              :with "is a"
+              :apply-to "all"))
   1)
 (test
   (= `header
@@ -52,7 +56,7 @@ The Owl
 `)
   true)
 
-(deftest tidy-up
+(deftest tidy-up-1
   (test (apply-changes (resource "directory/remove" dir-1)) 1))
 
 (deftest fail-sensibly-if-file-does-not-exist
@@ -69,3 +73,6 @@ The Owl
       (resource "file-line/ensure" dir-1 :line "rah")
       (string dir-1 " is not a regular file"))
     true))
+
+(deftest tidy-up-2
+  (test (apply-changes (resource "directory/remove" "/tmp/merp")) 1))

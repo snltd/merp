@@ -3,11 +3,11 @@
 (use ./lib)
 
 (def dir-1 "/tmp/merp/link-test-dir")
-(def file-1 (string dir-1 "/file-1"))
-(def file-2 (string dir-1 "/file-2"))
-(def file-3 (string dir-1 "/file-3"))
-(def link-1 (string dir-1 "/link-1"))
-(def link-2 (string dir-1 "/link-2"))
+(def file-1 (pathcat dir-1 "file-1"))
+(def file-2 (pathcat dir-1 "file-2"))
+(def file-3 (pathcat dir-1 "file-3"))
+(def link-1 (pathcat dir-1 "link-1"))
+(def link-2 (pathcat dir-1 "link-2"))
 (def source-1 "/etc/release")
 
 (deftest setup

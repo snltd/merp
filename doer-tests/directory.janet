@@ -41,7 +41,7 @@
   (test (apply-changes (gurp-example "directory/ensure-with-ids")) 0))
 
 (deftest directory-cannot-clobber-file
-  (def blocker (string dir-3 "/blocker"))
+  (def blocker (pathcat dir-3 "blocker"))
   (test (apply-changes (resource "file/ensure" blocker :content "abc")) 1)
   (test (present? blocker) true)
   (test (os/stat blocker :mode) :file)

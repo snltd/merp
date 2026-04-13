@@ -6,11 +6,14 @@
 (def dir-1 "/app")
 (def user-1 "appuser")
 (def svc-1 "snltd/example")
-(def manifest-path "/opt/site/lib/smf/manifest/gurp-example.xml")
+(def manifest-dir "/opt/site/lib/smf/manifest")
+(def manifest-path (string manifest-dir "/gurp-example.xml"))
 (def port-1 8080) # set in example
 (def port-2 9999)
 
 (deftest setup
+  (test (truthy?
+          (apply-changes (resource "directory/ensure" manifest-dir))) true)
   (test (apply-changes
           (cat
             (resource "directory/ensure" dir-1)

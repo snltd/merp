@@ -36,7 +36,7 @@
   (test (= original-start-time new-start-time) false))
 
 (deftest online-clears-state
-  ($ svcadm mark maintenance ,svc-1)
+  ($ /usr/sbin/svcadm mark maintenance ,svc-1)
   (os/sleep 1)
   (test ($< svcs -Hostate ,svc-1) "maintenance\n")
   (test (apply-changes (resource "svc/ensure" svc-1 :state "online")) 1)
