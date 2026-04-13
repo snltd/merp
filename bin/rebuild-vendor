@@ -1,0 +1,42 @@
+#!/bin/sh -e
+
+PATH=/bin
+
+# Assuming you have gmake and gcc, this will repopulate the /vendor directory
+# with whichever version of Janet you specify, along with latest JPM and all
+# Merp's dependencies.
+
+JANET_VERSION="v1.41.2"
+ 
+# You must have your merp directory at, or linked to, /merp
+MERP_ROOT="/merp"
+VENDOR_DIR="${MERP_ROOT}/vendor"
+test -d ${MERP_ROOT}/doer-tests
+
+rm -fr $VENDOR_DIR
+
+# JANET_TREE and friends will mess this up
+for envvar in $(env | sed -n '/JANET/s/=.*//p')
+do
+  unset $envvar
+done
+
+BUILD_DIR=$(mktemp -d)
+print "building in ${BUILD_DIR}"
+cd $BUILD_DIR
+
+git clone https://github.com/janet-lang/janet.git
+cd janet
+git checkout $JANET_VERSION
+PREFIX=$VENDOR_DIR gmake install
+
+cd $BUILD_DIR
+
+git clone https://github.com/janet-lang/jpm.git
+cd jpm
+${VENDOR_DIR}/bin/janet bootstrap.janet /merp/support/merp-npm-config.janet
+${VENDOR_DIR}/bin/jpm install judge sh
+cd
+
+# rm -fr $BUILD_DIR
+echo "ALL DONE!"
