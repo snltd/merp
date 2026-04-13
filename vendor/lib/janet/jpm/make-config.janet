@@ -76,7 +76,7 @@
       :c++-link (if iswin "link.exe" "c++")
       :cc (if iswin "cl.exe" "cc")
       :cc-link (if iswin "link.exe" "cc")
-      :cflags (if iswin @["/nologo" "/MD"] @["-std=c99" "-DJANET_NO_NANBOX"])
+      :cflags (if iswin @["/nologo" "/MD"] @["-std=c99"])
       :cppflags (if iswin @["/nologo" "/MD" "/EHsc"] @["-std=c++11"])
       :cflags-verbose @[]
       :curlpath "curl"

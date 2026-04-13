@@ -27,9 +27,9 @@
 
 #define JANET_VERSION_MAJOR 1
 #define JANET_VERSION_MINOR 41
-#define JANET_VERSION_PATCH 3
-#define JANET_VERSION_EXTRA "-dev"
-#define JANET_VERSION "1.41.3-dev"
+#define JANET_VERSION_PATCH 2
+#define JANET_VERSION_EXTRA ""
+#define JANET_VERSION "1.41.2"
 
 /* #define JANET_BUILD "local" */
 
@@ -1352,7 +1352,6 @@ typedef struct JanetFile JanetFile;
 struct JanetFile {
     FILE *file;
     int32_t flags;
-    size_t vbufsize;
 };
 
 /* For janet_try and janet_restore */
