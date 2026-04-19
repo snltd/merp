@@ -36,10 +36,10 @@ $ PATH=/path/to/gurp:$PATH
 And then you can run tests in a sandbox zone of the appropriate type.
 
 ```sh
-$ gurp apply zones/native-doer-tests.janet  # lipkg zone
-$ gurp apply zones/lx-doer-tests.janet      # lx zone
-$ gurp apply zones/pkgsrc-doer-tests.janet  # pkgin zone
-$ gurp apply zones/global-doer-tests.janet  # bhyve zone
+$ gurp apply doers/zones/native-doer-tests.janet  # lipkg zone
+$ gurp apply doers/zones/lx-doer-tests.janet      # lx zone
+$ gurp apply doers/zones/pkgsrc-doer-tests.janet  # pkgin zone
+$ gurp apply doers/zones/global-doer-tests.janet  # bhyve zone
 ```
 
 All these create the zone, run the tests, then remove the zone. If you want to
