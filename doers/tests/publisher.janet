@@ -3,8 +3,6 @@
 (use ./lib)
 (import ../../config/site)
 
-# Add a new publisher and remove it
-(comment
   (def new-publisher-name "localhostomnios")
   (def new-origin-uri "https://sfe.opencsw.org/localhostomnios/")
 
@@ -36,7 +34,7 @@
 
   (deftest new-idempotent-2
     (test (apply-changes (resource "publisher/remove" new-publisher-name)) 0)
-    (test (publisher-exists? new-publisher-name) false)))
+    (test (publisher-exists? new-publisher-name) false))
 
 # Manipulate an existing publisher. This assumes you've got a standard OmniOS setup
 # of the given revision
