@@ -1,0 +1,18 @@
+#!/bin/sh -xe
+
+# Run all doer tests
+
+MERP_ROOT=$(readlink -e ${0%/*}/..)
+GURP_BIN=$(readlink -e ${MERP_ROOT}/../gurp/target/debug/gurp)
+DOERS_DIR=${MERP_ROOT}/doers
+ZONES_DIR=${DOERS_DIR}/zones
+
+$GURP_BIN apply ${ZONES_DIR}/native-doer-tests.janet
+$GURP_BIN apply ${ZONES_DIR}/lx-doer-tests.janet
+$GURP_BIN apply ${ZONES_DIR}/pkgsrc-doer-tests.janet
+
+$GURP_BIN apply ${ZONES_DIR}/global-doer-tests.janet
+${DOERS_DIR}/bin/sync-bhyve
+${DOERS_DIR}/bin/run-bhyve
+
+print "ALL TESTS COMPLETED SUCCESSFULLY"

@@ -1,10 +1,6 @@
-(import ./site)
-(use roles/network)
+(use roles/infrastructure)
+(use roles/bootstrap-zones)
 
 (host "any"
-(zone/ensure "z-router"
-  :brand "lipkg"
-  :clone-from site/gold-zone
-  :
-
-)
+      (infrastructure)
+      (bootstrap-zones))
