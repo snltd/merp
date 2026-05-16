@@ -75,7 +75,7 @@
   (test (apply-fails
           (->> (gurp-example "file/ensure-from-url-with-checksum")
                (string/replace "LICENSE.txt" "NO-SUCH-THING"))
-          "http status: 404")
+          "HTTP error: 404")
         true))
 
 (deftest fails-if-parent-is-not-a-dir
