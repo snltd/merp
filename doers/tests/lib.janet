@@ -61,13 +61,15 @@
 (defmacro apply-changes-noop
   "Apply the given input with a noop and return the number of changes that
   would be made"
-  [input]
+  [input &opt show-output]
   ~(do
      (def buf @"")
      (def out
        ($?* @[,site/gurp 'apply '--noop '--exec ,input :> [stdout buf]]))
      (if-not out
        (error (string "expected noop-apply to succeed: failed with\n" buf)))
+     (if ,show-output
+       (print buf))
      (parse-changes buf)))
 
 (defn cat [& resources]
