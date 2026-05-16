@@ -11,7 +11,7 @@
                    (zone/network "serv_merp0"
                                  :allowed-address (string site/bhyve-dev-zone-ip
                                                           "/"
-                                                          site/ngz-netmask)
+                                                          site/netmask)
                                  :global-nic "auto")
                    (zone/bhyve
                      :ram "2G"
@@ -34,7 +34,7 @@
                          {:addresses [site/bhyve-dev-zone-ip]
                           :mtu 1500
                           :nameservers {:addresses [site/local-dns-server
-                                                    site/ngz-dns-server]
-                                        :search [site/ngz-dns-domain]}
+                                                    site/dns-server]
+                                        :search [site/dns-domain]}
                           :routes [{:to "0.0.0.0/0"
-                                    :via site/ngz-router}]}}}}})))
+                                    :via site/router}]}}}}})))

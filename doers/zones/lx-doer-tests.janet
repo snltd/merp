@@ -12,10 +12,10 @@
                    (zone/network "merp_lx0"
                                  :allowed-address (string site/lx-test-zone-ip
                                                           "/"
-                                                          site/ngz-netmask)
-                                 :defrouter site/ngz-router)
-                   :dns {:domain site/ngz-dns-domain
-                         :nameservers [site/ngz-dns-server]}
+                                                          site/netmask)
+                                 :defrouter site/router)
+                   :dns {:domain site/dns-domain
+                         :nameservers [site/dns-server]}
                    (zone/fs "/gurp"
                             :options ["ro"]
                             :special site/gurp-dir)

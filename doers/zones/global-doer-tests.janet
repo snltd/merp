@@ -1,6 +1,7 @@
 (import ./site)
 
-# Create an OmniOS bhyve zone, and copy an SSH key into it
+# Create an OmniOS bhyve zone, and copy an SSH key into it. You have to run
+# the tests yourself.
 
 (host "global-doer-tests"
       (zone/ensure site/global-test-zone-name
@@ -11,7 +12,7 @@
                    (zone/network "merp_bhyv0"
                                  :allowed-address (string site/global-test-zone-ip
                                                           "/"
-                                                          site/ngz-netmask)
+                                                          site/netmask)
                                  :global-nic "auto")
                    (zone/bhyve
                      :ram "2G"
@@ -33,7 +34,7 @@
                          {:addresses [site/global-test-zone-ip]
                           :mtu 1500
                           :nameservers {:addresses [site/local-dns-server
-                                                    site/ngz-dns-server]
-                                        :search [site/ngz-dns-domain]}
+                                                    site/dns-server]
+                                        :search [site/dns-domain]}
                           :routes [{:to "0.0.0.0/0"
-                                    :via site/ngz-router}]}}}}})))
+                                    :via site/router}]}}}}})))

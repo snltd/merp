@@ -5,17 +5,16 @@
 (def example-dir (pathcat gurp-dir "janet/examples"))
 
 (def local-network "192.168.1.")
-
-(def ngz-router "192.168.1.1")
-(def ngz-dns-domain "lan.id264.net")
-(def ngz-netmask "24")
-(def ngz-dns-server "1.1.1.1")
+(def router "192.168.1.1")
+(def dns-domain "lan.id264.net")
+(def netmask "24")
+(def dns-server "1.1.1.1")
 
 (def gold-zone-name "merp-gold-zone")
 (def gold-zone-ip "192.168.1.199")
 
-(def ngz-test-zone-name "merp-ngz-test")
-(def ngz-test-zone-ip "192.168.1.198")
+(def native-test-zone-name "merp-native-test")
+(def native-test-zone-ip "192.168.1.198")
 
 (def lx-test-zone-name "merp-lx-test")
 (def lx-test-zone-ip "192.168.1.197")

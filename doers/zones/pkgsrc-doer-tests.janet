@@ -1,6 +1,6 @@
 (import ./site)
 
-# Creates a pkgsrc zone, runs NGZ tests inside it, then removes the zone.
+# Creates a pkgsrc zone, runs tests inside it, then removes the zone.
 
 (host "pkgsrc-doer-tests"
       (zone/ensure site/pkgsrc-test-zone-name
@@ -10,10 +10,10 @@
                    (zone/network "merp_psrc0"
                                  :allowed-address (string site/pkgsrc-test-zone-ip
                                                           "/"
-                                                          site/ngz-netmask)
-                                 :defrouter site/ngz-router)
-                   :dns {:domain site/ngz-dns-domain
-                         :nameservers [site/ngz-dns-server]}
+                                                          site/netmask)
+                                 :defrouter site/router)
+                   :dns {:domain site/dns-domain
+                         :nameservers [site/dns-server]}
                    (zone/fs "/gurp"
                             :options ["ro"]
                             :special site/gurp-dir)

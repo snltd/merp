@@ -12,9 +12,9 @@
                    (zone/network "merp_net0"
                                  :allowed-address (string site/gold-zone-ip
                                                           "/"
-                                                          site/ngz-netmask)
-                                 :defrouter site/ngz-router)
-                   :dns {:domain site/ngz-dns-domain
-                         :nameservers [site/ngz-dns-server]}
+                                                          site/netmask)
+                                 :defrouter site/router)
+                   :dns {:domain site/dns-domain
+                         :nameservers [site/dns-server]}
                    :exec-in ["/bin/pkg install ooce/runtime/ruby-34"]
                    :final-state "installed"))
