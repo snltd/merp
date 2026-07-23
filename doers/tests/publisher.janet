@@ -1,4 +1,4 @@
-(use judge)
+*out* (use judge)
 (use sh)
 (use ./lib)
 (import ../../config/site)
