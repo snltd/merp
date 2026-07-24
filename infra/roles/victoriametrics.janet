@@ -1,9 +1,9 @@
 (import ../site)
 
-(role victoriametrics
-      (zfs/ensure (zfscat site/zfs-root "zone" "metrics"))
+(def delegated-dataset "rpool/merp-tests/metrics-data")
 
-      (zfs/ensure (zfscat site/zfs-root "zone" "metrics" "data")
+(role victoriametrics
+      (zfs/ensure (zfscat  delegated-dataset "metrics")
                   :properties {:mountpoint "/var/opt/ooce/victoriametrics"})
 
       (pkg/ensure "ooce/database/victoriametrics")

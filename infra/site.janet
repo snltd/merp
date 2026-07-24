@@ -19,6 +19,8 @@
 # This dataset will hold everything Merp creates
 (def zfs-root "rpool/merp-tests")
 
+(def omnios-version "r151056")
+
 # (def gold-zone "merp-gold-zone")
 
 # (def dns-server "1.1.1.1")

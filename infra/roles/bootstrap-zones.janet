@@ -47,7 +47,7 @@
                                                   "router.janet")))
 
       # A Gurp server. All the zones except Gold and Router are configured from
-      # this. 
+      # this. It contains a read-only loopback of this merp directory.
       # 
       (zone/ensure "mgurp"
                    :brand "lipkg"
@@ -57,8 +57,10 @@
                                  :global-nic network/stub/mgmt
                                  :allowed-address (network/cidr :gurp :mgmt)
                                  :defrouter (network/addr :router/mgmt))
-                   :copy-in {site/gurp-under-test "/opt/site/bin/"
-                             site/merp-dir site/gurp-config-dir}
+                   :copy-in {site/gurp-under-test "/opt/site/bin/"}
+                   (zone/fs site/gurp-config-dir
+                            :options ["ro"]
+                            :special site/merp-dir)
                    :dns network/dns
                    (zone/bootstrap :file (pathcat site/gurp-config-dir
                                                   "zones"
@@ -78,10 +80,17 @@
                    :copy-in {site/gurp-under-test "/opt/site/bin/"
                              site/merp-dir site/gurp-config-dir}
                    :dns network/dns
-                   (zone/bootstrap :server (network/addr :gurp))))
+                   (zone/bootstrap :server (network/addr :gurp)))
 
       # VictoriaMetrics. Gurp clients and server will send some metrics to this.
+      # It has a dedicated dataset for metric storage, so you can recreate the
+      # zone and not lose historical data.
       # 
+      (def mmetrics-dataset (zfscat site/zfs-root "metrics-data"))
+
+      (zfs/ensure mmetrics-dataset
+                  :properties {:mountpoint "none"})
+
       (zone/ensure "mmetrics"
                    :brand "lipkg"
                    :recreate (recreate? "mmetrics")
@@ -93,4 +102,27 @@
                    :copy-in {site/gurp-under-test "/opt/site/bin/"
                              site/merp-dir site/gurp-config-dir}
                    :dns network/dns
+                   :datasets [mmetrics-dataset]
+                   (zone/bootstrap :server (network/addr :gurp)))
+
+      # A Grafana zone. OmniOS doesn't have a Grafana package, so this is the
+      # perfect opportunity to test LX zones and the APK doer
+      # 
+      (def mgrafana-dataset (zfscat site/zfs-root "grafana-data"))
+
+      (zfs/ensure mgrafana-dataset
+                  :properties {:mountpoint "none"})
+
+      (zone/ensure "mgrafana"
+                   :brand "lx"
+                   :recreate (recreate? "mgrafana")
+                   :image "alpine"
+                   :final-state "reboot"
+                   (zone/attr "kernel-version" :value "4.4")
+                   (zone/network "mgrf0"
+                                 :global-nic network/stub/metrics
+                                 :allowed-address (network/cidr :grafana :metrics)
+                                 :defrouter (network/addr :router/metrics))
+                   :copy-in {"/opt/site/bin/gurp" "/opt/site/bin/gurp"}
+                   :datasets [mgrafana-dataset]
                    (zone/bootstrap :server (network/addr :gurp))))
