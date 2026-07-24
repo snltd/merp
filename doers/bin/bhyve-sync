@@ -1,6 +1,5 @@
 #!/bin/sh
 
-GURP_ZONE_DIR="/gurp/target/debug"
 MERP_ROOT=$(readlink -e ${0%/*}/../..)
 ZONE_IP=$(sed -n '/global-test-zone-ip/s/.*\"\(.*\)\".*/\1/p' \
   ${MERP_ROOT}/doers/zones/site.janet)

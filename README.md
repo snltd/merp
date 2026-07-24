@@ -27,6 +27,16 @@ APK packages in an Apline LX zone, and so-on.
 Merp uses Gurp to create a sandbox zone and execute the appropriate class of
 tests inside it.
 
+#### Run All Tests
+
+Run all tests with:
+
+```sh
+./bin/run-all-doer-tests
+```
+
+#### Run Groups of Tests
+
 Put the `gurp` binary you want to test at the start of your `$PATH`.
 
 ```sh
@@ -39,7 +49,6 @@ And then you can run tests in a sandbox zone of the appropriate type.
 $ gurp apply doers/zones/native-doer-tests.janet  # lipkg zone
 $ gurp apply doers/zones/lx-doer-tests.janet      # lx zone
 $ gurp apply doers/zones/pkgsrc-doer-tests.janet  # pkgin zone
-$ gurp apply doers/zones/global-doer-tests.janet  # bhyve zone
 ```
 
 All these create the zone, run the tests, then remove the zone. If you want to
@@ -47,7 +56,19 @@ keep the zone around for further debugging, comment out the `(zone/remove)`
 entry. Should anything get stuck and you want to clean up, run the same commands
 but with the `--destroy-everything-you-touch` flag.
 
-Note that the native zone is cloned, so repeat tests can be run quickly, but Gurp must first create the gold zone. This might take a while depending on your connection to the OmniOS packages servers, or whether you have a local mirror. The gold zone is NOT cleaned up automatically.
+Note that the native zone is cloned, so repeat tests can be run quickly, but
+Gurp must first create the gold zone. This might take a while depending on your
+connection to the OmniOS packages servers, or whether you have a local mirror.
+The gold zone is NOT cleaned up automatically.
+
+Global zone tests are run in a bhyve zone. Because Gurp (deliberately) lacks the
+ability to execute arbitrary commands, this requires extra steps.
+
+```sh
+$ gurp apply doers/zones/global-doer-tests.janet  # bhyve zone
+$ zones/bin/sync-bhyve
+$ zones/bin/run-bhyve
+```
 
 ## 2. Infrastructure Test
 
