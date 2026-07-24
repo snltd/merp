@@ -7,7 +7,10 @@
                    :brand "bhyve"
                    :autoboot false
                    :recreate 1
-                   :image "https://downloads.omnios.org/media/stable/omnios-r151056.cloud.zfs.zst"
+                   :image (string/format
+                            "https://downloads.omnios.org/media/%s/omnios-%s.cloud.zfs.zst"
+                            site/omnios-version
+                            site/omnios-version)
                    (zone/network "serv_merp0"
                                  :allowed-address (string site/bhyve-dev-zone-ip
                                                           "/"

@@ -4,6 +4,8 @@
 (def gurp (pathcat gurp-dir "target/debug/gurp"))
 (def example-dir (pathcat gurp-dir "janet/examples"))
 
+(def omnios-version "r151058")
+
 (def local-network "192.168.1.")
 (def router "192.168.1.1")
 (def dns-domain "lan.id264.net")
