@@ -19,7 +19,7 @@
                               :exec (argcat gurp-bin
                                             "server"
                                             "--config-dir"
-                                            (pathcat site/gurp-config-dir "zones"))
+                                            (pathcat site/gurp-config-dir "infra" "zones"))
                               :timeout 20
                               :user "gurp"
                               :group "daemon"

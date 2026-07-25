@@ -72,6 +72,12 @@ $ zones/bin/run-bhyve
 
 ## 2. Infrastructure Test
 
+Assuming you made the `PATH` change above: 
+
+```sh
+$ gurp apply infra/infra-tests.janet
+```
+
 ## Credits
 
 This project bundles, in `vendor/`, the following third-party components:

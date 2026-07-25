@@ -48,6 +48,8 @@
    :gold "192.168.1.102" # only used when you create the gold zone
 })
 
+(def proxy-port 3128)
+
 (def dns {:nameservers [dns-server]})
 
 (defn cidr [name network]

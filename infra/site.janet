@@ -1,6 +1,7 @@
 # Paths to resources under test
-(def merp-dir "/home/rob/work/merp/infra")
-(def gurp-under-test "/home/rob/work/gurp/target/debug/gurp")
+(def merp-dir (parent (parent (os/realpath (dyn *current-file*)))))
+(def gurp-dir (pathcat (parent merp-dir) "gurp"))
+(def gurp-under-test (pathcat gurp-dir "target/debug/gurp"))
 
 # Paths on zones
 (def site-dir "/opt/site")
@@ -18,6 +19,8 @@
 
 # This dataset will hold everything Merp creates
 (def zfs-root "rpool/merp-tests")
+
+(def omnios-version "r151058")
 
 # (def gold-zone "merp-gold-zone")
 
