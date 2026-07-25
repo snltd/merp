@@ -1,6 +1,9 @@
 (import ../site)
 (import ../network)
 
+# We only need core, and we don't use mirrors, because it takes for ever to add
+# proxies.
+
 (role use-pkg-proxy
       (def proxy-uri (string/format "http://%s:%d"
                                     (network/addr :proxy)
@@ -8,16 +11,7 @@
 
       (publisher/ensure "omnios"
                         (publisher/origin
-                          (string/format "https://pkg.omnios.org/%s/core/" site/omnios-version)
-                          :proxy proxy-uri)
-                        (publisher/mirror
-                          (string/format "https://us-west.mirror.omnios.org/%s/core/" site/omnios-version)
-                          :proxy proxy-uri))
-
-      (publisher/ensure "extra.omnios"
-                        (publisher/origin
-                          (string/format "https://pkg.omnios.org/%s/extra/" site/omnios-version)
-                          :proxy proxy-uri)
-                        (publisher/mirror
-                          (string/format "https://us-west.mirror.omnios.org/%s/extra/" site/omnios-version)
+                          (string/format "https://pkg.omnios.org/%s/core/"
+                                         site/omnios-version)
                           :proxy proxy-uri)))
+
