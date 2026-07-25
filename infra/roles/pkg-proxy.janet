@@ -21,10 +21,10 @@
 (role pkg-proxy
       (file/ensure "/etc/opt/ooce/squid/squid.conf"
                    :label "squid-conf"
+                   :mode "0600"
                    :content (template-out squid-config
-                  {
-                  :proxy-port network/proxy-port
-                  :acl-block acl-block}))
+                                          {:proxy-port network/proxy-port
+                                           :acl-block acl-block}))
 
       (pkg/ensure "ooce/network/proxy/squid")
 
