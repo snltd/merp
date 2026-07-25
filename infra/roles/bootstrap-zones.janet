@@ -1,9 +1,12 @@
 (import ../site)
 (import ../network)
 
+(def zone-dir (pathcat site/gurp-config-dir "infra" "zones"))
+
 (role bootstrap-zones
       # Most of the other zones are cloned from this one. It's very basic: just
-      # has the basenode role applied.
+      # has the basenode role applied. It halts after installation, and does
+      # not autoboot, because you can't clone a running zone.
       # 
       (zone/ensure site/gold-zone
                    :brand "lipkg"
@@ -15,10 +18,9 @@
                    :copy-in {site/gurp-under-test "/var/tmp/gurp"
                              site/merp-dir site/gurp-config-dir}
                    :dns network/dns
+                   :autoboot false
                    :final-state "installed"
-                   (zone/bootstrap :file (pathcat site/gurp-config-dir
-                                                  "zones"
-                                                  "gold.janet")))
+                   (zone/bootstrap :file (pathcat zone-dir "gold.janet")))
 
       # A router and NAT zone. Forwards traffic between etherstubs, and gives
       # internet access to the things that need it.
@@ -42,9 +44,7 @@
                    :copy-in {site/gurp-under-test "/opt/site/bin/gurp"
                              site/merp-dir site/gurp-config-dir}
                    :dns network/dns
-                   (zone/bootstrap :file (pathcat site/gurp-config-dir
-                                                  "zones"
-                                                  "router.janet")))
+                   (zone/bootstrap :file (pathcat zone-dir "mrouter.janet")))
 
       # A Gurp server. All the zones except Gold and Router are configured from
       # this. It contains a read-only loopback of this merp directory.
@@ -62,9 +62,7 @@
                             :options ["ro"]
                             :special site/merp-dir)
                    :dns network/dns
-                   (zone/bootstrap :file (pathcat site/gurp-config-dir
-                                                  "zones"
-                                                  "gurp.janet")))
+                   (zone/bootstrap :file (pathcat zone-dir "mgurp.janet")))
 
       # A proxy server which grants access to the OmniOS package repos to all
       # 10.x.x.x hosts.
