@@ -1,10 +1,11 @@
 (import ../network)
 
+# Use the IP adresses for the proxying, because we don't (yet?) have an internal
+# caching DNS
 (def squid-config (indoc `
   {{ acl-block }}
 
-  acl pkg_mirrors dstdomain pkg.omnios.org
-  acl pkg_mirrors dstdomain us-west.mirror.omnios.org
+  acl pkg_mirrors dst 129.132.2.8/32 45.154.216.80/32
 
   http_port {{ proxy-port }}
   cache deny all

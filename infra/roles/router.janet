@@ -1,21 +1,29 @@
 (import ../site)
 (import ../network)
 
-# NAT rules to allow proxy egress
-(def nat-proxy
+(def nat-template
   (indoc `
-    map mrpr0 {{ proxy-addr }}/32 -> {{ router-ip }}/32 portmap tcp/udp auto
-    map mrpr0 {{ proxy-addr }}/32 -> {{ router-ip }}/32`))
+    map mrpr0 {{ internal-addr }}/32 -> {{ router-ip }}/32 portmap tcp/udp auto
+    map mrpr0 {{ internal-addr }}/32 -> {{ router-ip }}/32`))
 
 (role router
       (ip-properties/ensure "router"
                             :ipv4 {:forwarding true})
 
-      (ipnat/ensure "internet-gateway"
+      # internet access for the pkg proxy
+      (ipnat/ensure "nat-pkg-proxy"
                     :priority 10
                     :content (template-out
-                               nat-proxy
-                               {:proxy-addr (network/addr :proxy)
+                               nat-template
+                               {:internal-addr (network/addr :proxy)
+                                :router-ip (network/addr :router/host)}))
+
+      # internet access for the DNS net/server
+      (ipnat/ensure "nat-dns"
+                    :priority 20
+                    :content (template-out
+                               nat-template
+                               {:internal-addr (network/addr :dns)
                                 :router-ip (network/addr :router/host)}))
 
       (ip-interface/ensure "mrpr0")

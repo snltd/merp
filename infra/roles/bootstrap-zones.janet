@@ -17,7 +17,7 @@
                                  :defrouter (network/addr :internet))
                    :copy-in {site/gurp-under-test "/var/tmp/gurp"
                              site/merp-dir site/gurp-config-dir}
-                   :dns network/dns
+                   :dns {:nameservers [network/external-dns]}
                    :autoboot false
                    :final-state "installed"
                    (zone/bootstrap :file (pathcat zone-dir "gold.janet")))
@@ -43,7 +43,7 @@
                                  :global-nic network/stub/metrics)
                    :copy-in {site/gurp-under-test "/opt/site/bin/gurp"
                              site/merp-dir site/gurp-config-dir}
-                   :dns network/dns
+                   :dns {:nameservers [(network/addr :dns)]}
                    (zone/bootstrap :file (pathcat zone-dir "mrouter.janet")))
 
       # A Gurp server. All the zones except Gold and Router are configured from
@@ -61,7 +61,7 @@
                    (zone/fs site/gurp-config-dir
                             :options ["ro"]
                             :special site/merp-dir)
-                   :dns network/dns
+                   :dns {:nameservers [(network/addr :dns)]}
                    (zone/bootstrap :file (pathcat zone-dir "mgurp.janet")))
 
       # A proxy server which grants access to the OmniOS package repos to all
@@ -77,7 +77,22 @@
                                  :defrouter (network/addr :router/mgmt))
                    :copy-in {site/gurp-under-test "/opt/site/bin/"
                              site/merp-dir site/gurp-config-dir}
-                   :dns network/dns
+                   :dns {:nameservers [network/external-dns
+                                       (network/addr :dns)]}
+                   (zone/bootstrap :server (network/addr :gurp)))
+
+      # A DNS server, so the things in the private subnets can see each other,
+      # and pkg requests don't time out. Needs the proxy so it can install BIND.
+      # 
+      (zone/ensure "mdns"
+                   :brand "lipkg"
+                   :recreate (recreate? "mdns")
+                   :clone-from site/gold-zone
+                   (zone/network "mdns0"
+                                 :global-nic network/stub/mgmt
+                                 :allowed-address (network/cidr :dns :mgmt)
+                                 :defrouter (network/addr :router/mgmt))
+                   :dns {:nameservers [(network/addr :dns) network/external-dns]}
                    (zone/bootstrap :server (network/addr :gurp)))
 
       # VictoriaMetrics. Gurp clients and server will send some metrics to this.
@@ -99,9 +114,9 @@
                                  :defrouter (network/addr :router/metrics))
                    :copy-in {site/gurp-under-test "/opt/site/bin/"
                              site/merp-dir site/gurp-config-dir}
-                   :dns network/dns
+                   :dns {:nameservers [(network/addr :dns)]}
                    :datasets [mmetrics-dataset]
-                   (zone/bootstrap :server (network/addr :gurp)))
+                   (zone/bootstrap :server "gurp"))
 
       # A Grafana zone. OmniOS doesn't have a Grafana package, so this is the
       # perfect opportunity to test LX zones and the APK doer
