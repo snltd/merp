@@ -1,0 +1,9 @@
+#!/bin/sh -xe
+
+# Run infrastructure test
+
+MERP_ROOT=$(readlink -e ${0%/*}/..)
+GURP_BIN=$(readlink -e ${MERP_ROOT}/../gurp/target/debug/gurp)
+INFRA_DIR="${MERP_ROOT}/infra"
+
+$GURP_BIN apply ${INFRA_DIR}/infra-main.janet
