@@ -3,7 +3,7 @@
 
 (role use-pkg-proxy
       (def proxy-uri (string/format "http://%s:%d"
-                                    (network/addr :proxy)
+                                    (network/addr :mproxy)
                                     network/proxy-port))
 
       (publisher/ensure "omnios"

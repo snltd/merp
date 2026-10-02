@@ -10,17 +10,19 @@
       # 
       (zone/ensure site/gold-zone
                    :brand "lipkg"
-                   # :recreate (recreate? site/gold-zone)
-                   (zone/network "mrpgold0"
+                   :recreate (recreate? site/gold-zone)
+                   (zone/network "mgold0"
                                  :global-nic network/physical-nic
                                  :allowed-address (network/cidr :gold :host)
                                  :defrouter (network/addr :internet))
-                   :copy-in {site/gurp-under-test "/var/tmp/gurp"
-                             site/merp-dir site/gurp-config-dir}
                    :dns {:nameservers [network/external-dns]}
                    :autoboot false
                    :final-state "installed"
-                   (zone/bootstrap :file (pathcat zone-dir "gold.janet")))
+                   (zone/fs site/in-zone-test-dir
+                            :options ["ro"]
+                            :special site/infra-test-dir)
+                   (zone/bootstrap
+                     :file (pathcat site/in-zone-test-dir "zones" "gold.janet")))
 
       # A router and NAT zone. Forwards traffic between etherstubs, and gives
       # internet access to the things that need it.
@@ -33,18 +35,20 @@
                    :brand "lipkg"
                    :recreate (recreate? "mrouter")
                    :clone-from site/gold-zone
-                   (zone/network "mrpr0"
+                   (zone/network "mrtr0"
                                  :global-nic network/physical-nic)
-                   (zone/network "mrpr1"
+                   (zone/network "mrtr1"
                                  :global-nic network/stub/dmz)
-                   (zone/network "mrpr2"
+                   (zone/network "mrtr2"
                                  :global-nic network/stub/mgmt)
-                   (zone/network "mrpr3"
-                                 :global-nic network/stub/metrics)
-                   :copy-in {site/gurp-under-test "/opt/site/bin/gurp"
-                             site/merp-dir site/gurp-config-dir}
-                   :dns {:nameservers [(network/addr :dns)]}
-                   (zone/bootstrap :file (pathcat zone-dir "mrouter.janet")))
+                   (zone/network "mrtr3"
+                                 :global-nic network/stub/telem)
+                   (zone/fs site/in-zone-test-dir
+                            :options ["ro"]
+                            :special site/infra-test-dir)
+                   :dns {:nameservers [(network/addr :mdns)]}
+                   (zone/bootstrap
+                     :file (pathcat site/in-zone-test-dir "zones" "mrouter.janet")))
 
       # A Gurp server. All the zones except Gold and Router are configured from
       # this. It contains a read-only loopback of this merp directory.
@@ -53,15 +57,16 @@
                    :brand "lipkg"
                    :recreate (recreate? "mgurp")
                    :clone-from site/gold-zone
-                   (zone/network "mrpg0"
+                   (zone/network "mprg0"
                                  :global-nic network/stub/mgmt
-                                 :allowed-address (network/cidr :gurp :mgmt)
-                                 :defrouter (network/addr :router/mgmt))
+                                 :allowed-address (network/cidr :mgurp :mgmt)
+                                 :defrouter (network/addr :mrouter/mgmt))
                    :copy-in {site/gurp-under-test "/opt/site/bin/"}
                    (zone/fs site/gurp-config-dir
                             :options ["ro"]
                             :special site/merp-dir)
-                   :dns {:nameservers [(network/addr :dns)]}
+                   :dns {:nameservers [(network/addr :mdns)]
+                         :domain network/local-domain}
                    (zone/bootstrap :file (pathcat zone-dir "mgurp.janet")))
 
       # A proxy server which grants access to the OmniOS package repos to all
@@ -73,13 +78,11 @@
                    :clone-from site/gold-zone
                    (zone/network "mprxy0"
                                  :global-nic network/stub/mgmt
-                                 :allowed-address (network/cidr :proxy :mgmt)
-                                 :defrouter (network/addr :router/mgmt))
-                   :copy-in {site/gurp-under-test "/opt/site/bin/"
-                             site/merp-dir site/gurp-config-dir}
+                                 :allowed-address (network/cidr :mproxy :mgmt)
+                                 :defrouter (network/addr :mrouter/mgmt))
                    :dns {:nameservers [network/external-dns
-                                       (network/addr :dns)]}
-                   (zone/bootstrap :server (network/addr :gurp)))
+                                       (network/addr :mdns)]}
+                   (zone/bootstrap :server (network/addr :mgurp)))
 
       # A DNS server, so the things in the private subnets can see each other,
       # and pkg requests don't time out. Needs the proxy so it can install BIND.
@@ -90,52 +93,53 @@
                    :clone-from site/gold-zone
                    (zone/network "mdns0"
                                  :global-nic network/stub/mgmt
-                                 :allowed-address (network/cidr :dns :mgmt)
-                                 :defrouter (network/addr :router/mgmt))
-                   :dns {:nameservers [(network/addr :dns) network/external-dns]}
-                   (zone/bootstrap :server (network/addr :gurp)))
+                                 :allowed-address (network/cidr :mdns :mgmt)
+                                 :defrouter (network/addr :mrouter/mgmt))
+                   :dns {:nameservers [(network/addr :mdns) network/external-dns]
+                         :domain network/local-domain}
+                   (zone/bootstrap :server (network/addr :mgurp)))
 
-      # VictoriaMetrics. Gurp clients and server will send some metrics to this.
-      # It has a dedicated dataset for metric storage, so you can recreate the
+      # Telemetry Gurp clients and server will send metrics and logs to this.
+      # It has a dedicated dataset for data storage, so you can recreate the
       # zone and not lose historical data.
       # 
-      (def mmetrics-dataset (zfscat site/zfs-root "metrics-data"))
+      (def mtelem-dataset (zfscat site/zfs-root "telemetry-data"))
 
-      (zfs/ensure mmetrics-dataset
+      (zfs/ensure mtelem-dataset
                   :properties {:mountpoint "none"})
 
-      (zone/ensure "mmetrics"
+      (zone/ensure "mtelem"
                    :brand "lipkg"
-                   :recreate (recreate? "mmetrics")
+                   :recreate (recreate? "mtelem")
                    :clone-from site/gold-zone
-                   (zone/network "mmtrc0"
-                                 :global-nic network/stub/metrics
-                                 :allowed-address (network/cidr :vm :metrics)
-                                 :defrouter (network/addr :router/metrics))
-                   :copy-in {site/gurp-under-test "/opt/site/bin/"
-                             site/merp-dir site/gurp-config-dir}
-                   :dns {:nameservers [(network/addr :dns)]}
-                   :datasets [mmetrics-dataset]
-                   (zone/bootstrap :server "gurp"))
+                   (zone/network "mtlm0"
+                                 :global-nic network/stub/telem
+                                 :allowed-address (network/cidr :mtelem :telem)
+                                 :defrouter (network/addr :mrouter/telem))
+                   :dns {:nameservers [(network/addr :mdns)]
+                         :domain network/local-domain}
+                   :datasets [mtelem-dataset]
+                   (zone/bootstrap :server "mgurp"))
 
       # A Grafana zone. OmniOS doesn't have a Grafana package, so this is the
       # perfect opportunity to test LX zones and the APK doer
       # 
-      (def mgrafana-dataset (zfscat site/zfs-root "grafana-data"))
+      # (def mgrafana-dataset (zfscat site/zfs-root "grafana-data"))
 
-      (zfs/ensure mgrafana-dataset
-                  :properties {:mountpoint "none"})
+      # (zfs/ensure mgrafana-dataset
+      #             :properties {:mountpoint "none"})
 
-      (zone/ensure "mgrafana"
-                   :brand "lx"
-                   :recreate (recreate? "mgrafana")
-                   :image "alpine"
-                   :final-state "reboot"
-                   (zone/attr "kernel-version" :value "4.4")
-                   (zone/network "mgrf0"
-                                 :global-nic network/stub/metrics
-                                 :allowed-address (network/cidr :grafana :metrics)
-                                 :defrouter (network/addr :router/metrics))
-                   :copy-in {"/opt/site/bin/gurp" "/opt/site/bin/gurp"}
-                   :datasets [mgrafana-dataset]
-                   (zone/bootstrap :server (network/addr :gurp))))
+      # (zone/ensure "mgrafana"
+      #              :brand "lx"
+      #              :recreate (recreate? "mgrafana")
+      #              :image "alpine"
+      #              :final-state "reboot"
+      #              (zone/attr "kernel-version" :value "4.4")
+      #              (zone/network "mgrf0"
+      #                            :global-nic network/stub/telem
+      #                            :allowed-address (network/cidr :mgrafana :telem)
+      #                            :defrouter (network/addr :router/telem))
+      #              :copy-in {"/opt/site/bin/gurp" "/opt/site/bin/gurp"}
+      #              :datasets [mgrafana-dataset]
+      #              (zone/bootstrap :server (network/addr :mgurp)))
+      )

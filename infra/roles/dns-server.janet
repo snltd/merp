@@ -48,7 +48,7 @@
              (catseq [[name ip] :in (relevant-records subnet-prefix)]
                (string/format "%-5s IN PTR %s.%s."
                               (last (string/split "." ip))
-                              name
+                              (string/replace "/" "-" name)
                               network/local-domain)))
     "\n"))
 
@@ -57,7 +57,9 @@
   (string/join
     (sort-by |(int/u64 (last (string/split "." $)))
              (catseq [[hostname ip] :in (relevant-records "10.")]
-               (string/format "%-20s IN A %s" hostname ip)))
+               (string/format "%-20s IN A %s"
+                              (string/replace "/" "-" hostname)
+                              ip)))
     "\n"))
 
 (role dns-server

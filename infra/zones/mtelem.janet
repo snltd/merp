@@ -1,8 +1,8 @@
 (use ../roles/basenode)
 (use ../roles/use-pkg-proxy)
-(use ../roles/victoriametrics)
+(use ../roles/telemetry)
 
-(host "mmetrics"
+(host "mtelem"
       (basenode)
       (use-pkg-proxy)
-      (victoriametrics))
+      (telemetry))

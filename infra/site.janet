@@ -2,6 +2,8 @@
 (def merp-dir (parent (parent (os/realpath (dyn *current-file*)))))
 (def gurp-dir (pathcat (parent merp-dir) "gurp"))
 (def gurp-under-test (pathcat gurp-dir "target/debug/gurp"))
+(def infra-test-dir (pathcat merp-dir "infra"))
+(def in-zone-test-dir "/var/tmp/merp")
 
 # Paths on zones
 (def site-dir "/opt/site")
