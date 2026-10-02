@@ -1,4 +1,4 @@
-*out* (use judge)
+(use judge)
 (use sh)
 (use ./lib)
 (import ../../config/site)
@@ -43,29 +43,35 @@
 # extra.omnios   mirror   online F https://us-west.mirror.omnios.org/r151056/extra/
 
 (let [publisher-name "extra.omnios"
-      origin-uri (string/format "https://pkg.omnios.org/%s/extra/" omnios-version)
-      mirror-uri (string/format "https://us-west.mirror.omnios.org/%s/extra/" omnios-version)
+      origin-uri (string/format "https://pkg.omnios.org/%s/extra/"
+                                omnios-version)
+      mirror-uri (string/format "https://us-west.mirror.omnios.org/%s/extra/"
+                                omnios-version)
 
       publisher-with-mirror
       (string/format
-        `(publisher/ensure "%s" (publisher/origin "%s") (publisher/mirror "%s"))`
+        `(publisher/ensure "%s"
+          (publisher/origin "%s")
+          (publisher/mirror "%s"))`
         publisher-name
         origin-uri
         mirror-uri)
 
       publisher-without-mirror
       (string/format
-        `(publisher/ensure "%s" (publisher/origin "%s"))`
+        `(publisher/ensure "%s"
+          (publisher/origin "%s"))`
         publisher-name
         origin-uri)]
 
   (deftest publisher-with-mirror
-    # We can't be sure what publisher setup the zone begins with, do don't check
+    # We can't be sure what publisher setup the zone begins with, so don't check
     # how many changes this makes.
-    (test (truthy? (apply-changes publisher-with-mirror)) true)
+    (test (truthy? (apply-changes publisher-with-mirror )) true)
 
     (let [publisher-output ($< pkg publisher extra.omnios)]
       (test (truthy? (string/find (string "Origin URI: " origin-uri) publisher-output)) true)
+
       (test (truthy? (string/find (string "Mirror URI: " mirror-uri) publisher-output)) true)))
 
   (deftest modify-idempotent-1
