@@ -9,6 +9,8 @@ options {
         forwarders {
                 192.168.1.1;
         };
+        allow-recursion { 10.1.0.0/24; 10.2.0.0/24; 10.3.0.0/24; 127.0.0.1; };
+        allow-query-cache { 10.1.0.0/24; 10.2.0.0/24; 10.3.0.0/24; 127.0.0.1; };
 };
 
 // Enable rndc administration on loopback interface.
