@@ -7,6 +7,6 @@
       (zfs/ensure site/zfs-root)
       (etherstub/ensure network/stub/dmz)
       (etherstub/ensure network/stub/mgmt)
-      (etherstub/ensure network/stub/metrics)
+      (etherstub/ensure network/stub/telem)
 
       (bridge/ensure "mbridge"))

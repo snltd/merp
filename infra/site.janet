@@ -1,6 +1,9 @@
 # Paths to resources under test
-(def merp-dir "/home/rob/work/merp/infra")
-(def gurp-under-test "/home/rob/work/gurp/target/debug/gurp")
+(def merp-dir (parent (parent (os/realpath (dyn *current-file*)))))
+(def gurp-dir (pathcat (parent merp-dir) "gurp"))
+(def gurp-under-test (pathcat gurp-dir "target/debug/gurp"))
+(def infra-test-dir (pathcat merp-dir "infra"))
+(def in-zone-test-dir "/var/tmp/merp")
 
 # Paths on zones
 (def site-dir "/opt/site")
@@ -9,15 +12,18 @@
 (def site-smf-manifest (string site-dir "/lib/smf/manifest"))
 (def site-smf-method (string site-dir "/lib/smf/method"))
 
+(def zone-gurp (pathcat site-bin "gurp"))
+
 (def cron-log-dir "/var/log/cron_jobs")
 (def gurp-config-dir "/var/tmp/merp")
 
 (def gold-zone "mgold")
 
-(def local-domain "merp.test")
 
 # This dataset will hold everything Merp creates
 (def zfs-root "rpool/merp-tests")
+
+(def omnios-version "r151058")
 
 # (def gold-zone "merp-gold-zone")
 
@@ -50,26 +56,33 @@
 # (def path-to-ssh-pubkey "/home/rob/.ssh/id_rsa.pub")
 
 
-#                      Internet (192.168.1.1)
-#                             │
-#                      e1000g0 192.168.1.101
-#                             │
-#            ┌────────────────┴─────────────────┐
-#            │       Router/Firewall zone        │
-#            │  net0: 192.168.1.101/24  (WAN)   │
-#            │  net1: 10.1.0.1/24       (DMZ)   │
-#            │  net2: 10.2.0.1/24       (mgmt)  │
-#            │  net3: 10.3.0.1/24       (metrics)│
-#            │  NAT · ip-forwarding · ipf        │
-#            │  port-fwd 3000→grafana            │
-#            └──────┬──────────┬────────┬────────┘
-#                   │          │        │
-#                mstub1     mstub2   mstub3
-#            10.1.0.0/24  10.2.0.0  10.3.0.0
-#               (DMZ)      (mgmt)   (metrics)
-#                   │          │        │
-#           ┌───────┘    ┌─────┘   ┌────┘
-#           │            │         │
+#                    Internet (192.168.1.1)
+#                             |
+#                     e1000g0 (192.168.1.5)
+#                             |
+#            +----------------+---------------------+
+#            |             mrouter                  |
+#            |  mrp0/v4: 192.168.1.101 (WAN)     |
+#            |  mrp1/v4: 10.1.0.1      (DMZ)     |   
+#            |  mrp2/v4: 10.2.0.1      (mgmt)    |   mgmt traffic NAT to internet
+#            |  mrp3/v4: 10.3.0.1      (metrics) |
+# 
+#            |  NAT · ip-forwarding · ipf        
+#            |  port-fwd 3000→grafana            
+#            +--------------------------------------+
+#               |               |                |
+#             mstub1          mstub2           mstub3
+#           10.1.0.0/24     10.2.0.0/24      10.3.0.0/24
+#             (DMZ)           (mgmt)         (metrics)
+#               |               |                |
+#                          mgurp 10.2.0.10                                      
+#                          mdns 10.2.0.53                                       
+#                                                                 
+#                                                                 
+#                                                                 
+#                                                                 
+#                                                                 
+# www
 #      ┌────┴────┐   ┌───┴──────────────┐  ┌──────────────────┐
 #      │ mbridge │   │  Gurp  10.2.0.10 │  │ VictoriaMetrics  │
 #      └──┬────┬─┘   │  DNS   10.2.0.53 │  │ 10.3.0.10        │

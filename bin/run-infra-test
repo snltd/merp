@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+# Run infrastructure test. Any arguments will be passed through to
+# the gurp apply
+
+MERP_ROOT=$(readlink -e ${0%/*}/..)
+GURP_BIN=$(readlink -e ${MERP_ROOT}/../gurp/target/debug/gurp)
+INFRA_DIR="${MERP_ROOT}/infra"
+
+$GURP_BIN apply $@ ${INFRA_DIR}/infra-tests.janet

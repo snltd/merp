@@ -22,7 +22,8 @@ Merp tests each of
 [Gurp's doers](https://github.com/snltd/gurp/tree/main/doc/doers) more-or-less
 in isolation. Different doers require different zone types. For instance, you
 can only set the kernel scheduler class in the global zone; you can only install
-APK packages in an Apline LX zone, and so-on.
+APK packages in an Apline LX zone, and so-on. Therefore, to run all the doer
+tests, you must be in a global zone.
 
 Merp uses Gurp to create a sandbox zone and execute the appropriate class of
 tests inside it.
@@ -31,8 +32,8 @@ tests inside it.
 
 Run all tests with:
 
-```sh
-./bin/run-all-doer-tests
+```
+# ./bin/run-all-doer-tests
 ```
 
 #### Run Groups of Tests
@@ -71,6 +72,12 @@ $ zones/bin/run-bhyve
 ```
 
 ## 2. Infrastructure Test
+
+Assuming you made the `PATH` change above: 
+
+```sh
+$ gurp apply infra/infra-tests.janet
+```
 
 ## Credits
 

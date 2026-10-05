@@ -1,0 +1,101 @@
+options {
+        directory       "{{ var-dir }}";
+        pid-file        "run/named.pid";
+        dump-file       "dump/named_dump.db";
+        statistics-file "stats/named.stats";
+        disable-empty-zone "255.255.255.255.IN-ADDR.ARPA";
+        disable-empty-zone "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.IP6.ARPA";
+        disable-empty-zone "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.IP6.ARPA";
+        forwarders {
+                192.168.1.1;
+        };
+        allow-recursion { 10.1.0.0/24; 10.2.0.0/24; 10.3.0.0/24; 127.0.0.1; };
+        allow-query-cache { 10.1.0.0/24; 10.2.0.0/24; 10.3.0.0/24; 127.0.0.1; };
+};
+
+// Enable rndc administration on loopback interface.
+include "{{ conf-dir }}/rndc.key";
+controls {
+      inet 127.0.0.1 port 953
+      allow { 127.0.0.1; } keys { "rndc-key"; };
+};
+
+logging {
+     channel default_log {
+          file "/var/log/opt/ooce/named/default" versions 3 size 20m;
+          print-time yes;
+          print-category yes;
+          print-severity yes;
+          severity info;
+     };
+     category queries { default_log; };
+     category default { default_log; };
+     category config { default_log; };
+};
+
+zone "." {
+        type slave;
+        file "namedb/slave/root.slave";
+        masters {
+                192.0.32.132;           // lax.xfr.dns.icann.org
+                2620:0:2d0:202::132;    // lax.xfr.dns.icann.org
+                192.0.47.132;           // iad.xfr.dns.icann.org
+                2620:0:2830:202::132;   // iad.xfr.dns.icann.org
+        };
+        notify no;
+};
+zone "arpa" {
+        type slave;
+        file "namedb/slave/arpa.slave";
+        masters {
+                192.0.32.132;           // lax.xfr.dns.icann.org
+                2620:0:2d0:202::132;    // lax.xfr.dns.icann.org
+                192.0.47.132;           // iad.xfr.dns.icann.org
+                2620:0:2830:202::132;   // iad.xfr.dns.icann.org
+        };
+        notify no;
+};
+zone "in-addr.arpa" {
+        type slave;
+        file "namedb/slave/in-addr.arpa.slave";
+        masters {
+                192.0.32.132;           // lax.xfr.dns.icann.org
+                2620:0:2d0:202::132;    // lax.xfr.dns.icann.org
+                192.0.47.132;           // iad.xfr.dns.icann.org
+                2620:0:2830:202::132;   // iad.xfr.dns.icann.org
+        };
+        notify no;
+};
+zone "ip6.arpa" {
+        type slave;
+        file "namedb/slave/ip6.arpa.slave";
+        masters {
+                192.0.32.132;           // lax.xfr.dns.icann.org
+                2620:0:2d0:202::132;    // lax.xfr.dns.icann.org
+                192.0.47.132;           // iad.xfr.dns.icann.org
+                2620:0:2830:202::132;   // iad.xfr.dns.icann.org
+        };
+        notify no;
+};
+
+include "{{ conf-dir }}/rfc.zones";
+
+zone "0.1.10.in-addr.arpa" in {
+  type master;
+  file "namedb/master/db.10.1.0";
+};
+
+zone "0.2.10.in-addr.arpa" in {
+  type master;
+  file "namedb/master/db.10.2.0";
+};
+
+zone "0.3.10.in-addr.arpa" in {
+  type master;
+  file "namedb/master/db.10.3.0";
+};
+
+zone "{{ local-domain }}" in {
+  type master;
+  file "namedb/master/db.{{ local-domain }}";
+};

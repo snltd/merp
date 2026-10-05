@@ -1,5 +1,5 @@
-# (import "../helpers")
-(import "../site")
+(import ../site)
+(import ../network)
 
 (def etc-default-cron (indoc `
          CRONLOG=YES
@@ -7,7 +7,7 @@
 
 (role basenode
       (section nfs
-               (misc/ensure :nfs-domain site/local-domain))
+               (misc/ensure :nfs-domain network/local-domain))
 
       (section dirs
                (directory/ensure "/export" :group "sys")

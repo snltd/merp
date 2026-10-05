@@ -30,7 +30,8 @@
 (defn parse-changes
   "Extract the number of changes from Gurp log output"
   [output]
-  (when-let [m (peg/match ~(* (thru "changes: ") (<- :d+)) output)]
+  (def peg ~(* (thru (* "resources:" :s+  :d+ :s+ "changes: ")) (<- :d+)))
+  (when-let [m (peg/match peg output)]
     (scan-number (first m))))
 
 (defmacro apply-fails
@@ -39,7 +40,7 @@
   [input pattern]
   ~(do
      (def buf @"")
-     (def out ($?* @[,site/gurp 'apply '--exec ,input :> [stdout buf]]))
+     (def out ($?* @[,site/gurp 'apply '--no-lock '--no-report  '--exec ,input :> [stdout buf]]))
      (if-not (string/find ,pattern buf)
        (error
          (string "did not find '" ,pattern "' in Gurp output:\n" buf)))
@@ -47,15 +48,16 @@
 
 (defmacro apply-changes
   "Apply the given input and return the number of changes"
-  [input &opt show-output]
+  [input &named show-output with-debug]
   ~(do
+     (when ,with-debug (os/setenv "RUST_LOG" "debug"))
      (def buf @"")
      (def out
-       ($?* @[,site/gurp 'apply '--dump-diffs '--exec ,input :> [stdout buf]]))
+       ($?* @[,site/gurp 'apply '--no-lock '--no-report '--dump-diffs '--exec ,input :> [stdout buf]]))
      (if-not out
        (error (string "expected apply to succeed: failed with\n" buf)))
-     (if ,show-output
-       (print buf))
+     (when ,show-output (print buf))
+     (when ,with-debug (os/setenv "RUST_LOG" nil))
      (parse-changes buf)))
 
 (defmacro apply-changes-noop
@@ -65,7 +67,7 @@
   ~(do
      (def buf @"")
      (def out
-       ($?* @[,site/gurp 'apply '--noop '--exec ,input :> [stdout buf]]))
+       ($?* @[,site/gurp 'apply '--no-lock '--no-report '--noop '--exec ,input :> [stdout buf]]))
      (if-not out
        (error (string "expected noop-apply to succeed: failed with\n" buf)))
      (if ,show-output
