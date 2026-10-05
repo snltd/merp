@@ -12,6 +12,8 @@
 (def site-smf-manifest (string site-dir "/lib/smf/manifest"))
 (def site-smf-method (string site-dir "/lib/smf/method"))
 
+(def zone-gurp (pathcat site-bin "gurp"))
+
 (def cron-log-dir "/var/log/cron_jobs")
 (def gurp-config-dir "/var/tmp/merp")
 

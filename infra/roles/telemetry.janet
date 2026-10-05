@@ -19,6 +19,6 @@
 
       (pkg/ensure "ooce/database/victorialogs")
 
-      (svc/ensure "/ooce/application/victorialogs:victoria-logs"
+      (svc/ensure "/ooce/database/victorialogs:victoria-logs"
                   :state "online"))
             )
