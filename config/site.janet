@@ -40,7 +40,7 @@
 # viable looking match etc, but so far it works fine.
 # You might need to change some of these, or make the code smarter.
 
-(defn physical []
+(def physical 
   (->>
     (run-cmd "/usr/sbin/ipadm show-if -po ifname,class")
     (string/split "\n")
@@ -48,7 +48,7 @@
     (string/split ":")
     (first)))
 
-(defn physical-addr []
+(def physical-addr 
   (->>
     (run-cmd "/usr/sbin/ipadm show-addr -po addrobj,addr")
     (string/split "\n")
@@ -56,16 +56,16 @@
     (string/split ":")
     (last)))
 
-(defn netmask [] (last (string/split "/" physical-addr)))
+(def netmask (last (string/split "/" physical-addr)))
 
-(defn network-addr []
+(def network-addr 
   (if (= netmask "24")
     (array/slice (string/split "." physical-addr) 0 3)
     (error (string "unsupported netmask: " netmask))))
 
 # These might clash in a dynamic environment
-(defn doer-addr-1 [] (addr network-addr 123))
-(defn doer-addr-2 [] (addr network-addr 124))
+(def doer-addr-1 (addr network-addr 123))
+(def doer-addr-2 (addr network-addr 124))
 
 # #- GOLD ZONE ------------------------------------------------------------------
 (def gold-zone "merp-gold-zone")
