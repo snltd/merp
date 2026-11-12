@@ -115,6 +115,9 @@
 (defn ip-address-exists? [addr-name]
   ($? ipadm show-addr ,addr-name :> [stdout :null] :> [stderr :null]))
 
+(defn ipmp-group-exists? [group-name]
+  (has-value? (string/split "\n" ($< ipmpstat -gPo group)) group-name))
+
 (defn network-flow-exists? [flow-name]
   ($? flowadm show-flow ,flow-name :> [stdout :null] :> [stderr :null]))
 
