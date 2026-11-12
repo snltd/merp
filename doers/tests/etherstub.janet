@@ -33,5 +33,5 @@
 (deftest fail-with-invalid-name
   (test
     (apply-fails (resource "etherstub/ensure" "stubby")
-                 "dladm: invalid link name 'stubby'")
+                 "link name 'stubby' must end with a number")
     true))
