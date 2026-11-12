@@ -68,7 +68,7 @@
   (test (apply-fails
           (->> (gurp-example "file/ensure-from-url-with-checksum")
                (string/replace "LICENSE.txt" "README.md"))
-          "Remote file has incorrect checksum")
+          "incorrect checksum for /example/file/from-url")
         true))
 
 (deftest create-from-url-fails-on-404
